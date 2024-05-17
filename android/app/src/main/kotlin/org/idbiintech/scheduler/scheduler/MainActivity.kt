@@ -1,4 +1,4 @@
-package org.idbiintech.scheduler.scheduler
+package org.idbiintech.scheduler
 
 import io.flutter.embedding.android.FlutterActivity
 

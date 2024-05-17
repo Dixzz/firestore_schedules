@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="org.idbiintech.scheduler.scheduler">
+    package="org.idbiintech.scheduler">
    <application
         android:label="scheduler"
         android:name="${applicationName}"

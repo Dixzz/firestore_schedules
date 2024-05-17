@@ -1,10 +1,20 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:scheduler/firebase_options.dart';
+import 'package:scheduler/helpers/auto_path.dart' show generateRouter;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'provider/global_providers.dart';
+import 'main.reflectable.dart' show initializeReflectable;
 
 void main() async {
+  initializeReflectable();
+
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(ProviderScope(overrides: [
     sharedPreferencesProvider
         .overrideWithValue(await SharedPreferences.getInstance()),
@@ -17,21 +27,22 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       title: 'Flutter Demo',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
+
+        textTheme: GoogleFonts.nunitoTextTheme(
+          // openSansTextTheme
+          // Theme.of(context).textTheme.apply(
+          // bodyColor: AppColors.mainTextColor3,
+          // ),
+        ),
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      routerConfig: GoRouter(
+          debugLogDiagnostics: true,
+          initialLocation: '/',
+          routes: generateRouter()),
     );
   }
 }
