@@ -137,6 +137,30 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.1"
+  cloud_firestore:
+    dependency: "direct main"
+    description:
+      name: cloud_firestore
+      sha256: "8bfbb5a2edbc6052452326d60de0113fea2bcbf081d34a3f8e45c8b38307b31c"
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.14.0"
+  cloud_firestore_platform_interface:
+    dependency: transitive
+    description:
+      name: cloud_firestore_platform_interface
+      sha256: "73ff438fe46028f0e19f55da18b6ddc6906ab750562cd7d9ffab77ff8c0c4307"
+      url: "https://pub.dev"
+    source: hosted
+    version: "6.1.0"
+  cloud_firestore_web:
+    dependency: transitive
+    description:
+      name: cloud_firestore_web
+      sha256: "232e45e95970d3a6baab8f50f9c3a6e2838d145d9d91ec9a7392837c44296397"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.9.0"
   code_builder:
     dependency: transitive
     description:
@@ -185,6 +209,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.3.2"
+  easy_date_timeline:
+    dependency: "direct main"
+    description:
+      path: easy_date_timeline
+      relative: true
+    source: path
+    version: "1.1.1"
   fake_async:
     dependency: transitive
     description:
@@ -233,30 +264,21 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.10.0"
-  firebase_database:
+  firebase_ui_firestore:
     dependency: "direct main"
     description:
-      name: firebase_database
-      sha256: "8568ad41f9312ab1f162f70c1e3e7cb7420b8bc8d07e4d543e575bb0cb41f8a5"
-      url: "https://pub.dev"
-    source: hosted
-    version: "10.4.0"
-  firebase_database_platform_interface:
+      path: "firebase_ui_firestore-1.4.0"
+      relative: true
+    source: path
+    version: "1.4.0"
+  firebase_ui_localizations:
     dependency: transitive
     description:
-      name: firebase_database_platform_interface
-      sha256: "4366ade2390f8799a317bb13af29c2a1fdfc84f4d04372094756b86a6cbfd305"
+      name: firebase_ui_localizations
+      sha256: "3f2548115b5f33fabc5cc47bee2f1d1d11a049381fbd64a8ecdd04fda6564319"
       url: "https://pub.dev"
     source: hosted
-    version: "0.2.5+16"
-  firebase_database_web:
-    dependency: transitive
-    description:
-      name: firebase_database_web
-      sha256: "4920a83b917493b37fd408cbb01c289ef8a422d9ed48982f908a9850290262f9"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.2.3+16"
+    version: "1.8.0"
   fixnum:
     dependency: transitive
     description:
@@ -286,6 +308,11 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.3"
+  flutter_localizations:
+    dependency: transitive
+    description: flutter
+    source: sdk
+    version: "0.0.0"
   flutter_riverpod:
     dependency: transitive
     description:
@@ -384,6 +411,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.0.2"
+  intl:
+    dependency: "direct main"
+    description:
+      name: intl
+      sha256: "910f85bce16fb5c6f614e117efa303e85a1731bb0081edf3604a2ae6e9a3cc91"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.17.0"
   io:
     dependency: transitive
     description:
@@ -456,6 +491,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.4"
+  omni_datetime_picker:
+    dependency: "direct main"
+    description:
+      name: omni_datetime_picker
+      sha256: "6ddcefe75db549c8858ab0d491b67edd5e70221d1757615c3559eab201782024"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.0"
   package_config:
     dependency: transitive
     description:
@@ -560,14 +603,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.2.3"
-  reflectable:
-    dependency: "direct main"
-    description:
-      name: reflectable
-      sha256: "775388897bfce5b1d0386b7160706367b565cdc72b5870bc6a198d0f7be1aa0b"
-      url: "https://pub.dev"
-    source: hosted
-    version: "4.0.5"
   riverpod:
     dependency: transitive
     description:
