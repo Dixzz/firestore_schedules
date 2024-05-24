@@ -1,0 +1,24 @@
+name: implicitly_animated_reorderable_list
+version: 0.4.2
+homepage: https://pub.dev/packages/implicitly_animated_reorderable_list
+
+
+environment:
+  sdk: '>=2.19.6 <3.0.0'
+#  sdk: ">=3.0.2 <4.0.0"
+#  flutter: ">=1.17.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_lints: ^2.0.0
+  flutter_test:
+    sdk: flutter
+
+platforms:
+  android:
+  ios:
+
+flutter:

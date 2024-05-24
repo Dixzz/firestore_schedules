@@ -3,8 +3,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class Event {
   final String appName;
   final DateTime created;
+  final bool edit;
 
-  const Event(this.appName, this.created);
+  const Event(this.appName, this.created, [this.edit = false]);
+
 
   factory Event.fromJson(dynamic json) {
     return Event(
@@ -17,6 +19,7 @@ class Event {
     final map = <String, dynamic>{};
     map['appName'] = appName;
     map['created'] = Timestamp.fromDate(created);
+    map['edit'] = edit;
     return map;
   }
 }
