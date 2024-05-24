@@ -19,7 +19,6 @@ import 'package:scheduler/helpers/logger.dart';
 import 'package:scheduler/main.dart' show faClientMemColRef, faProdMemColRef;
 import 'package:scheduler/models/api_helper.dart';
 import 'package:scheduler/models/fs_product_member.dart';
-import 'package:url_launcher/url_launcher_string.dart';
 
 class AddEventController extends GetxController {
   late final prodMembers = <ProductMember>[].obs;
@@ -31,6 +30,7 @@ class AddEventController extends GetxController {
   /// input fields
   late final duration = Duration.zero.obs;
   late final meeting = DateTime.now().obs;
+  late final meetingLink = TextEditingController();
   late final ctr = TextEditingController();
   late final appNameCtr = TextEditingController();
   late final clNameCtr = TextEditingController();
@@ -51,7 +51,9 @@ class AddEventController extends GetxController {
     });
   }
 
-  Future<void> save() async {}
+  Future<void> save() async {
+
+  }
 
   @override
   void dispose() async {
@@ -61,6 +63,7 @@ class AddEventController extends GetxController {
     await _clientsSubs?.cancel();
     ctr.dispose();
     clNameCtr.dispose();
+    meetingLink.dispose();
     appNameCtr.dispose();
   }
 
@@ -337,98 +340,36 @@ class AddEvent extends StatelessWidget {
             const SizedBox(
               height: 24,
             ),
-            ObxValue(
-                (p0) => Wrap(
-                      spacing: 8,
-                      runSpacing: 14,
-                      children: [
-                        DecoratedBox(
-                          decoration: ShapeDecoration(
-                            shape: RoundedRectangleBorder(
-                              side: const BorderSide(
-                                  width: 1, color: Color(0xFFC6C6C6)),
-                              borderRadius: BorderRadius.circular(12),
+            Wrap(
+              spacing: 8,
+              runSpacing: 14,
+              children: [
+                ObxValue(
+                    (p0) => SizedBox(
+                          width: 160,
+                          child: DecoratedBox(
+                            decoration: ShapeDecoration(
+                              shape: RoundedRectangleBorder(
+                                side: const BorderSide(
+                                    width: 1, color: Color(0xFFC6C6C6)),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
                             ),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(10.0),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(
-                                      'Date',
-                                      style: GoogleFonts.nunito(
-                                        color: const Color(0xFF929292),
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w600,
-                                        height: 0,
-                                      ),
-                                    ),
-                                    Text(
-                                      DatePatterns.eeeddmmmyy.format(p0.value),
-                                      style: GoogleFonts.nunito(
-                                        color: Colors.black,
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w600,
-                                        height: 0,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(
-                                  width: 16,
-                                ),
-                                SvgPicture.asset(
-                                  'assets/images/ic_date_outlined.svg',
-                                  width: 16,
-                                )
-                              ],
-                            ),
-                          ),
-                        ),
-                        DecoratedBox(
-                          decoration: ShapeDecoration(
-                            shape: RoundedRectangleBorder(
-                              side: const BorderSide(
-                                  width: 1, color: Color(0xFFC6C6C6)),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          child: GestureDetector(
-                            onTap: () async {
-                              var res = await Get.dialog(Dialog(
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(12.0),
-                                    child: OmniDtpBasic(
-                                      firstDate: DateTime.now(),
-                                      type: OmniDateTimePickerType.dateAndTime,
-                                    ),
-                                  )));
-                              if (res is DateTime) {
-                                c.meeting.value = res;
-                              }
-                            },
                             child: Padding(
                               padding: const EdgeInsets.all(10.0),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Column(
                                     crossAxisAlignment:
-                                    CrossAxisAlignment.start,
+                                        CrossAxisAlignment.start,
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       Text(
-                                        'Clock',
+                                        'Date',
                                         style: GoogleFonts.nunito(
                                           color: const Color(0xFF929292),
                                           fontSize: 12,
@@ -437,21 +378,19 @@ class AddEvent extends StatelessWidget {
                                         ),
                                       ),
                                       Text(
-                                        TimePatterns.ddmmaa.format(p0.value),
+                                        DatePatterns.eeeddmmmyy
+                                            .format(p0.value),
                                         style: GoogleFonts.nunito(
                                           color: Colors.black,
-                                          fontSize: 16,
+                                          fontSize: 14,
                                           fontWeight: FontWeight.w600,
                                           height: 0,
                                         ),
                                       ),
                                     ],
                                   ),
-                                  const SizedBox(
-                                    width: 50,
-                                  ),
                                   SvgPicture.asset(
-                                    'assets/images/ic_clock_outlined.svg',
+                                    'assets/images/ic_date_outlined.svg',
                                     width: 16,
                                   )
                                 ],
@@ -459,200 +398,313 @@ class AddEvent extends StatelessWidget {
                             ),
                           ),
                         ),
-                        DecoratedBox(
-                          decoration: ShapeDecoration(
-                            shape: RoundedRectangleBorder(
-                              side: const BorderSide(
-                                  width: 1, color: Color(0xFFC6C6C6)),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          child: GestureDetector(
-                            onTap: () async {
-                              launchUrlString(
-                                  'https://meet.google.com/dye-wojk-wzz?pli=1',
-                                  mode: LaunchMode.externalApplication);
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.all(10.0),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Column(
-                                    crossAxisAlignment:
-                                    CrossAxisAlignment.start,
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Text(
-                                        'Link to join',
-                                        style: GoogleFonts.nunito(
-                                          color: const Color(0xFF929292),
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w600,
-                                          height: 0,
-                                        ),
-                                      ),
-                                      FutureBuilder(
-                                        builder: (_, data) {
-                                          AnyLinkPreview.isValidLink(
-                                              'https://meet.google.com/dye-wojk-wzz?pli=1');
-                                          if (data.hasError) {
-                                            return const Text(
-                                                'Unable to preview');
-                                          }
-                                          final img = _buildImageProvider(
-                                              data.data?.image);
-                                          if (img == null) {
-                                            return const Text(
-                                                'Unable to preview');
-                                          }
-                                          return Row(children: [
-                                            Image(
-                                              image: img,
-                                              width: 20,
-                                            ),
-                                            const SizedBox(
-                                              width: 8,
-                                            ),
-                                            Text(data.data?.title ?? 'NA',
-                                                style: GoogleFonts.comfortaa(
-                                                  color: Colors.black,
-                                                  // fontSize: 16,
-                                                  fontWeight: FontWeight.w700,
-                                                  height: 0,
-                                                ))
-                                          ]);
-                                        },
-                                        future: AnyLinkPreview.getMetadata(
-                                            link:
-                                            'https://meet.google.com/dye-wojk-wzz?pli=1'),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(
-                                    width: 55,
-                                  ),
-                                  Align(
-                                    alignment: Alignment.topRight,
-                                    child: SvgPicture.asset(
-                                      'assets/images/ic_meeting_outlined.svg',
-                                      width: 16,
-                                    ),
-                                  )
-                                ],
+                    c.meeting),
+                ObxValue(
+                    (p0) => SizedBox(
+                          width: 160,
+                          child: DecoratedBox(
+                            decoration: ShapeDecoration(
+                              shape: RoundedRectangleBorder(
+                                side: const BorderSide(
+                                    width: 1, color: Color(0xFFC6C6C6)),
+                                borderRadius: BorderRadius.circular(12),
                               ),
                             ),
-                          ),
-                        ),
-                        DecoratedBox(
-                          decoration: ShapeDecoration(
-                            shape: RoundedRectangleBorder(
-                              side: const BorderSide(
-                                  width: 1, color: Color(0xFFC6C6C6)),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          child: GestureDetector(
-                            onTap: () {
-                              Get.dialog(Dialog(
-                                backgroundColor: Colors.transparent,
-                                child: DecoratedBox(
-                                  decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(16)),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(12.0),
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      crossAxisAlignment:
-                                      CrossAxisAlignment.start,
-                                      children: [
-                                        const SizedBox(
-                                          height: 8,
-                                        ),
-                                        Text(
-                                          'Create meeting duration',
-                                          style: GoogleFonts.comfortaa(
-                                              fontSize: 16),
-                                        ),
-                                        const SizedBox(
-                                          height: 16,
-                                        ),
-                                        Center(
-                                          child: ObxValue(
-                                                  (p0) => DurationPicker(
-                                                onChange: c.holder,
-                                                duration: c.holder.value,
-                                              ),
-                                              c.holder),
-                                        ),
-                                        Center(
-                                            child: FilledButton(
-                                                onPressed: () {
-                                                  c.duration.value =
-                                                      c.holder.value;
-                                                  Get.back();
-                                                },
-                                                child: const Text('Save')))
-                                      ],
+                            child: GestureDetector(
+                              onTap: () async {
+                                var res = await Get.dialog(Dialog(
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
                                     ),
-                                  ),
-                                ),
-                              ));
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.all(10.0),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Column(
-                                    crossAxisAlignment:
-                                    CrossAxisAlignment.start,
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Text(
-                                        'Duration',
-                                        style: GoogleFonts.nunito(
-                                          color: const Color(0xFF929292),
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w600,
-                                          height: 0,
-                                        ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(12.0),
+                                      child: OmniDtpBasic(
+                                        firstDate: DateTime.now(),
+                                        type:
+                                            OmniDateTimePickerType.dateAndTime,
                                       ),
-                                      ObxValue((p0) {
-                                        final hour = p0.value.inHours;
-                                        final min = p0.value.inMinutes % 60;
-                                        return Text(
-                                          hour > 0
-                                              ? '${hour}h ${min}m'
-                                              : '${min}m',
+                                    )));
+                                if (res is DateTime) {
+                                  c.meeting.value = res;
+                                }
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.all(10.0),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          'Clock',
                                           style: GoogleFonts.nunito(
-                                            color: Colors.black,
-                                            fontSize: 16,
+                                            color: const Color(0xFF929292),
+                                            fontSize: 12,
                                             fontWeight: FontWeight.w600,
                                             height: 0,
                                           ),
-                                        );
-                                      }, c.duration),
-                                    ],
-                                  ),
-                                  const SizedBox(
-                                    width: 75,
-                                  ),
-                                  SvgPicture.asset(
-                                    'assets/images/ic_duration_outlined.svg',
-                                    width: 16,
-                                  )
-                                ],
+                                        ),
+                                        Text(
+                                          TimePatterns.ddmmaa.format(p0.value),
+                                          style: GoogleFonts.nunito(
+                                            color: Colors.black,
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w600,
+                                            height: 0,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    SvgPicture.asset(
+                                      'assets/images/ic_clock_outlined.svg',
+                                      width: 16,
+                                    )
+                                  ],
+                                ),
                               ),
                             ),
                           ),
                         ),
-                      ],
+                    c.meeting),
+                SizedBox(
+                  width: 160,
+                  child: DecoratedBox(
+                    decoration: ShapeDecoration(
+                      shape: RoundedRectangleBorder(
+                        side: const BorderSide(
+                            width: 1, color: Color(0xFFC6C6C6)),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
-                c.meeting),
+                    child: GestureDetector(
+                      onTap: () async {
+                        Get.dialog(Dialog(
+                          backgroundColor: Colors.transparent,
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(16)),
+                            child: Padding(
+                              padding: const EdgeInsets.all(12.0),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const SizedBox(
+                                    height: 8,
+                                  ),
+                                  Text(
+                                    'Create meeting link',
+                                    style: GoogleFonts.comfortaa(fontSize: 16),
+                                  ),
+                                  const SizedBox(
+                                    height: 16,
+                                  ),
+                                  TextField(
+                                    controller: c.ctr,
+                                    autofocus: true,
+                                    style: GoogleFonts.nunito(),
+                                    decoration: const InputDecoration.collapsed(
+                                        hintText: 'Paste link'),
+                                    onSubmitted: (_) async {
+                                      await c.verify(faProdMemColRef);
+                                    },
+                                  ),
+                                  const SizedBox(
+                                    height: 24,
+                                  ),
+                                  Center(
+                                      child: FilledButton(
+                                          onPressed: () {
+                                            c.duration.value = c.holder.value;
+                                            Get.back();
+                                          },
+                                          child: const Text('Save')))
+                                ],
+                              ),
+                            ),
+                          ),
+                        ));
+                        // launchUrlString(
+                        //     'https://meet.google.com/dye-wojk-wzz?pli=1',
+                        //     mode: LaunchMode.externalApplication);
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  'Link to join',
+                                  style: GoogleFonts.nunito(
+                                    color: const Color(0xFF929292),
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    height: 0,
+                                  ),
+                                ),
+                                FutureBuilder(
+                                  builder: (_, data) {
+                                    AnyLinkPreview.isValidLink(
+                                        'https://meet.google.com/dye-wojk-wzz?pli=1');
+                                    if (data.hasError) {
+                                      return const Text('Unable to preview');
+                                    }
+                                    final img =
+                                        _buildImageProvider(data.data?.image);
+                                    if (img == null) {
+                                      return const Text('Unable to preview');
+                                    }
+                                    return Row(children: [
+                                      Image(
+                                        image: img,
+                                        width: 20,
+                                      ),
+                                      const SizedBox(
+                                        width: 8,
+                                      ),
+                                      Text(data.data?.title ?? 'NA',
+                                          style: GoogleFonts.comfortaa(
+                                            color: Colors.black,
+                                            // fontSize: 16,
+                                            fontWeight: FontWeight.w700,
+                                            height: 0,
+                                          ))
+                                    ]);
+                                  },
+                                  future: AnyLinkPreview.getMetadata(
+                                      link:
+                                          'https://meet.google.com/dye-wojk-wzz?pli=1'),
+                                ),
+                              ],
+                            ),
+                            Align(
+                              alignment: Alignment.topRight,
+                              child: SvgPicture.asset(
+                                'assets/images/ic_meeting_outlined.svg',
+                                width: 16,
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  width: 160,
+                  child: DecoratedBox(
+                    decoration: ShapeDecoration(
+                      shape: RoundedRectangleBorder(
+                        side: const BorderSide(
+                            width: 1, color: Color(0xFFC6C6C6)),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: GestureDetector(
+                      onTap: () {
+                        Get.dialog(Dialog(
+                          backgroundColor: Colors.transparent,
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(16)),
+                            child: Padding(
+                              padding: const EdgeInsets.all(12.0),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const SizedBox(
+                                    height: 8,
+                                  ),
+                                  Text(
+                                    'Create meeting duration',
+                                    style: GoogleFonts.comfortaa(fontSize: 16),
+                                  ),
+                                  const SizedBox(
+                                    height: 16,
+                                  ),
+                                  Center(
+                                    child: ObxValue(
+                                        (p0) => DurationPicker(
+                                              onChange: c.holder,
+                                              duration: c.holder.value,
+                                            ),
+                                        c.holder),
+                                  ),
+                                  Center(
+                                      child: FilledButton(
+                                          onPressed: () {
+                                            c.duration.value = c.holder.value;
+                                            Get.back();
+                                          },
+                                          child: const Text('Save')))
+                                ],
+                              ),
+                            ),
+                          ),
+                        ));
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  'Duration',
+                                  style: GoogleFonts.nunito(
+                                    color: const Color(0xFF929292),
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    height: 0,
+                                  ),
+                                ),
+                                ObxValue((p0) {
+                                  final hour = p0.value.inHours;
+                                  final min = p0.value.inMinutes % 60;
+                                  return Text(
+                                    hour > 0 ? '${hour}h ${min}m' : '${min}m',
+                                    style: GoogleFonts.nunito(
+                                      color: Colors.black,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                      height: 0,
+                                    ),
+                                  );
+                                }, c.duration),
+                              ],
+                            ),
+                            SvgPicture.asset(
+                              'assets/images/ic_duration_outlined.svg',
+                              width: 16,
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
             const SizedBox(
               height: 16,
             ),

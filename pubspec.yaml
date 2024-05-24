@@ -39,16 +39,15 @@ dependencies:
   cupertino_icons: ^1.0.2
 
   flutter_riverpod: ^2.3.7
-  build_runner: ^2.3.3
   firebase_core: ^2.24.2
   intl: ^0.17.0
   easy_date_timeline:
-    path: ./easy_date_timeline
+    path: ./pub/easy_date_timeline
   cloud_firestore: ^4.14.0
   firebase_ui_firestore:
-    path: firebase_ui_firestore-1.4.0
+    path: ./pub/firebase_ui_firestore-1.4.0
   implicitly_animated_reorderable_list:
-    path: implicitly_animated_reorderable_list
+    path: ./pub/implicitly_animated_reorderable_list
   get: ^4.6.5
   flutter_svg: ^2.0.5
   any_link_preview: ^3.0.0
@@ -56,14 +55,17 @@ dependencies:
   fluttertoast: ^8.2.5
   flutter_switch: ^0.3.2
   modal_bottom_sheet:
-    path: modal_bottom_sheet-2.1.2
+    path: ./pub/modal_bottom_sheet-2.1.2
   duration_picker: ^1.2.0
   omni_datetime_picker:
-    path: omni_datetime_picker-1.1.0
+    path: ./pub/omni_datetime_picker-1.1.0
+  json_annotation: ^4.8.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  build_runner: ^2.3.3
+  json_serializable: ^6.6.2
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
