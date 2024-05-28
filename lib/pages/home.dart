@@ -7,6 +7,8 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:implicitly_animated_reorderable_list/implicitly_animated_reorderable_list.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
+import 'package:omni_datetime_picker/omni_datetime_picker.dart';
+import 'package:omni_datetime_picker/src/variants/omni_datetime_picker_variants/omni_dtp_basic.dart';
 import 'package:scheduler/helpers/dates.dart';
 import 'package:scheduler/helpers/iterable_extensions.dart';
 import 'package:scheduler/helpers/iterables.dart';
@@ -70,6 +72,7 @@ class Home extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.all(12.0),
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
                   child: Column(
@@ -86,47 +89,71 @@ class Home extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 4),
-                      ObxValue(
-                          (p0) => Text(
+                      GestureDetector(
+                        onTap: () async {
+                          var res = await Get.dialog(Dialog(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: const Padding(
+                                padding: EdgeInsets.all(12.0),
+                                child: OmniDtpBasic(
+                                  type: OmniDateTimePickerType.date,
+                                ),
+                              )));
+                          if (res is DateTime) {
+                            c
+                              ..filterDate.value = res
+                              ..eventSubs?.cancel()
+                              ..fetchEvents();
+                          }
+                        },
+                        child: Row(mainAxisSize: MainAxisSize.min,children: [
+                          ObxValue(
+                                  (p0) => Text(
                                 DatePatterns.eeeddmmm.format(p0.value),
                                 textAlign: TextAlign.center,
                                 style: GoogleFonts.comfortaa(
-                                    fontSize: 24, fontWeight: FontWeight.w600),
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.w600),
                                 overflow: TextOverflow.ellipsis,
                               ),
-                          c.filterDate),
+                              c.filterDate),
+                          const SizedBox(width: 4,),
+                          const Icon(Icons.keyboard_arrow_down_rounded, size: 24,)
+                        ],),
+                      ),
                     ],
                   ),
                 ),
-                const SizedBox(
-                  width: 16,
-                ),
-                DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: const Color(0xff4993ff),
-                    borderRadius: BorderRadius.circular(24),
-                  ),
-                  child: InkWell(
-                    onTap: () async {
-                      await showCustomModalBottomSheet(
-                          context: context,
-                          builder: (_) => const AddEvent(),
-                          containerWidget: (BuildContext context,
-                              Animation<double> animation, Widget child) {
-                            return Scaffold(body: child);
-                          });
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.only(
-                          left: 20, top: 14, right: 20, bottom: 14),
-                      child: Text(
-                        'Add New',
-                        textAlign: TextAlign.center,
-                        style: GoogleFonts.comfortaa(
-                            color: Colors.white,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700),
-                        overflow: TextOverflow.ellipsis,
+                Flexible(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: const Color(0xff4993ff),
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    child: InkWell(
+                      onTap: () async {
+                        await showCustomModalBottomSheet(
+                            context: context,
+                            builder: (_) => const AddEvent(),
+                            containerWidget: (BuildContext context,
+                                Animation<double> animation, Widget child) {
+                              return Scaffold(body: child);
+                            });
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.only(
+                            left: 20, top: 14, right: 20, bottom: 14),
+                        child: Text(
+                          'Add New',
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.comfortaa(
+                              color: Colors.white,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700),
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
                     ),
                   ),
@@ -203,14 +230,16 @@ class Home extends StatelessWidget {
                         )
                       : ObxValue(
                           (p0) => EasyDateTimeLine(
+                                key: ValueKey(p0.value),
                                 initialDate: p0.value,
                                 activeColor: const Color(0x334993ff),
                                 headerProps:
                                     const EasyHeaderProps(showHeader: false),
-                                onDateChange: (d) {
-                                  c.filterDate.value = d;
-                                  c.eventSubs?.cancel();
-                                  c.fetchEvents();
+                                onDateChange: (res) {
+                                  c
+                                    ..filterDate.value = res
+                                    ..eventSubs?.cancel()
+                                    ..fetchEvents();
                                 },
                                 // timeLineProps: EasyTimeLineProps(
                                 //   vPadding: 20,

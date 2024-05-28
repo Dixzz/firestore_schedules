@@ -21,7 +21,6 @@ import 'package:scheduler/main.dart'
 import 'package:scheduler/models/api_helper.dart';
 import 'package:scheduler/models/fs_event.dart';
 import 'package:scheduler/models/fs_product_member.dart';
-import 'package:url_launcher/url_launcher_string.dart';
 
 class AddEventController extends GetxController {
   late final prodMembers = <ProductMember>[].obs;
@@ -74,8 +73,10 @@ class AddEventController extends GetxController {
 
   void reset() {
     try {
-      clientMembers[clientIndex] = ProductMember(clientMembers[clientIndex].name, false);
-      prodMembers[prodIndex] = ProductMember(clientMembers[prodIndex].name, false);
+      clientMembers[clientIndex] =
+          ProductMember(clientMembers[clientIndex].name, false);
+      prodMembers[prodIndex] =
+          ProductMember(clientMembers[prodIndex].name, false);
       prodIndex = -1;
       clientIndex = -1;
       ctr.clear();
@@ -83,9 +84,7 @@ class AddEventController extends GetxController {
       clNameCtr.clear();
       meetingLink.clear();
       appNameCtr.clear();
-    } catch(_) {
-
-    }
+    } catch (_) {}
   }
 
   @override
@@ -387,8 +386,7 @@ class AddEvent extends StatelessWidget {
                           padding: const EdgeInsets.all(12.0),
                           child: OmniDtpBasic(
                             firstDate: DateTime.now(),
-                            type:
-                            OmniDateTimePickerType.dateAndTime,
+                            type: OmniDateTimePickerType.dateAndTime,
                           ),
                         )));
                     if (res is DateTime) {
@@ -522,184 +520,6 @@ class AddEvent extends StatelessWidget {
                         ),
                     c.meeting),
                 GestureDetector(
-                  onTap: () async {
-                    final bool res = await Get.dialog(Dialog(
-                      backgroundColor: Colors.transparent,
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(16)),
-                        child: Padding(
-                          padding: const EdgeInsets.all(12.0),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment:
-                            CrossAxisAlignment.start,
-                            children: [
-                              const SizedBox(
-                                height: 8,
-                              ),
-                              Text(
-                                'Create meeting link',
-                                style: GoogleFonts.comfortaa(
-                                    fontSize: 16),
-                              ),
-                              const SizedBox(
-                                height: 16,
-                              ),
-                              TextField(
-                                autofocus: true,
-                                controller: c.meetingLink,
-                                style: GoogleFonts.nunito(),
-                                decoration:
-                                const InputDecoration.collapsed(
-                                    hintText: 'Paste link'),
-                                onSubmitted: (_) async {
-                                  Get.back(result: true);
-                                },
-                              ),
-                              const SizedBox(
-                                height: 24,
-                              ),
-                              Center(
-                                  child: FilledButton(
-                                      onPressed: () {
-                                        Get.back(result: true);
-                                      },
-                                      child: const Text('Save')))
-                            ],
-                          ),
-                        ),
-                      ),
-                    )) ??
-                        false;
-                    if (res) {
-                      c.meetingHolder.value = c.meetingLink.text;
-                      c.meetingLink.clear();
-                    }
-
-                    // launchUrlString(
-                    //     'https://meet.google.com/dye-wojk-wzz?pli=1',
-                    //     mode: LaunchMode.externalApplication);
-                  },
-                  child: SizedBox(
-                    width: 160,
-                    child: ClipRect(
-                      child: DecoratedBox(
-                        decoration: ShapeDecoration(
-                          shape: RoundedRectangleBorder(
-                            side: const BorderSide(
-                                width: 1, color: Color(0xFFC6C6C6)),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(10.0),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Flexible(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(
-                                      'Link to join',
-                                      style: GoogleFonts.nunito(
-                                        color: const Color(0xFF929292),
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w600,
-                                        height: 0,
-                                      ),
-                                    ),
-                                    ObxValue(
-                                        (p0) => p0.value != null
-                                            ? FutureBuilder(
-                                                builder: (_, data) {
-                                                  AnyLinkPreview.isValidLink(
-                                                      p0.value!);
-                                                  if (data.hasError) {
-                                                    return Text(
-                                                      'Unable to preview',
-                                                      style:
-                                                          GoogleFonts.comfortaa(
-                                                        color: Colors.black,
-                                                        fontSize: 14,
-                                                        fontWeight:
-                                                            FontWeight.w600,
-                                                        height: 0,
-                                                      ),
-                                                      overflow:
-                                                          TextOverflow.ellipsis,
-                                                    );
-                                                  }
-                                                  final img =
-                                                      _buildImageProvider(
-                                                          data.data?.image);
-                                                  if (img == null) {
-                                                    return Text(
-                                                        'Unable to preview',
-                                                        style: GoogleFonts
-                                                            .comfortaa(
-                                                          color: Colors.black,
-                                                          fontSize: 14,
-                                                          fontWeight:
-                                                              FontWeight.w600,
-                                                          height: 0,
-                                                        ));
-                                                  }
-                                                  return Row(children: [
-                                                    Image(
-                                                      image: img,
-                                                      width: 20,
-                                                    ),
-                                                    const SizedBox(
-                                                      width: 8,
-                                                    ),
-                                                    Text(
-                                                        data.data?.title ??
-                                                            'NA',
-                                                        overflow: TextOverflow
-                                                            .ellipsis,
-                                                        style: GoogleFonts
-                                                            .comfortaa(
-                                                          color: Colors.black,
-                                                          // fontSize: 16,
-                                                          fontWeight:
-                                                              FontWeight.w700,
-                                                          height: 0,
-                                                        ))
-                                                  ]);
-                                                },
-                                                future:
-                                                    AnyLinkPreview.getMetadata(
-                                                        link: p0.value!),
-                                              )
-                                            : const Text(
-                                                'Enter meeting link...',
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
-                                        c.meetingHolder),
-                                  ],
-                                ),
-                              ),
-                              Align(
-                                alignment: Alignment.topRight,
-                                child: SvgPicture.asset(
-                                  'assets/images/ic_meeting_outlined.svg',
-                                  width: 16,
-                                ),
-                              )
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                GestureDetector(
                   onTap: () {
                     Get.dialog(Dialog(
                       backgroundColor: Colors.transparent,
@@ -725,10 +545,10 @@ class AddEvent extends StatelessWidget {
                               ),
                               Center(
                                 child: ObxValue(
-                                        (p0) => DurationPicker(
-                                      onChange: c.holder,
-                                      duration: c.holder.value,
-                                    ),
+                                    (p0) => DurationPicker(
+                                          onChange: c.holder,
+                                          duration: c.holder.value,
+                                        ),
                                     c.holder),
                               ),
                               Center(
@@ -781,7 +601,7 @@ class AddEvent extends StatelessWidget {
                                     hour > 0 ? '${hour}h ${min}m' : '${min}m',
                                     style: GoogleFonts.nunito(
                                       color: Colors.black,
-                                      fontSize: 16,
+                                      fontSize: 12,
                                       fontWeight: FontWeight.w600,
                                       height: 0,
                                     ),
@@ -799,6 +619,202 @@ class AddEvent extends StatelessWidget {
                     ),
                   ),
                 ),
+                GestureDetector(
+                  onTap: () async {
+                    if(c.virtual.value) return;
+                    final bool res = await Get.dialog(Dialog(
+                      backgroundColor: Colors.transparent,
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius:
+                            BorderRadius.circular(16)),
+                        child: Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment:
+                            CrossAxisAlignment.start,
+                            children: [
+                              const SizedBox(
+                                height: 8,
+                              ),
+                              Text(
+                                'Create meeting link',
+                                style: GoogleFonts.comfortaa(
+                                    fontSize: 16),
+                              ),
+                              const SizedBox(
+                                height: 16,
+                              ),
+                              TextField(
+                                autofocus: true,
+                                controller: c.meetingLink,
+                                style: GoogleFonts.nunito(),
+                                decoration:
+                                const InputDecoration
+                                    .collapsed(
+                                    hintText: 'Paste link'),
+                                onSubmitted: (_) async {
+                                  Get.back(result: true);
+                                },
+                              ),
+                              const SizedBox(
+                                height: 24,
+                              ),
+                              Center(
+                                  child: FilledButton(
+                                      onPressed: () {
+                                        Get.back(result: true);
+                                      },
+                                      child:
+                                      const Text('Save')))
+                            ],
+                          ),
+                        ),
+                      ),
+                    )) ??
+                        false;
+                    if (res) {
+                      c.meetingHolder.value = c.meetingLink.text;
+                    }
+
+                    c.meetingLink.clear();
+                  },
+                  child: SizedBox(
+                    width: 160,
+                    child: ObxValue(
+                        (p0) => AnimatedOpacity(
+                              opacity: !p0.value ? 1 : .2,
+                              duration: const Duration(seconds: 1),
+                              child: DecoratedBox(
+                                decoration: ShapeDecoration(
+                                  shape: RoundedRectangleBorder(
+                                    side: const BorderSide(
+                                        width: 1, color: Color(0xFFC6C6C6)),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(10.0),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Flexible(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Text(
+                                              'Link to join',
+                                              style: GoogleFonts.nunito(
+                                                color: const Color(0xFF929292),
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w600,
+                                                height: 0,
+                                              ),
+                                            ),
+                                            ObxValue(
+                                                (p0) => p0.value != null
+                                                    ? FutureBuilder(
+                                                        builder: (_, data) {
+                                                          if (data.hasError) {
+                                                            return Text(
+                                                              'Unable to preview',
+                                                              style: GoogleFonts
+                                                                  .comfortaa(
+                                                                color: Colors
+                                                                    .black,
+                                                                fontSize: 14,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w600,
+                                                                height: 0,
+                                                              ),
+                                                              overflow:
+                                                                  TextOverflow
+                                                                      .ellipsis,
+                                                            );
+                                                          }
+                                                          final img =
+                                                              _buildImageProvider(
+                                                                  data.data
+                                                                      ?.image);
+                                                          if (img == null) {
+                                                            return Text(
+                                                                'Unable to preview',
+                                                                style: GoogleFonts
+                                                                    .comfortaa(
+                                                                  color: Colors
+                                                                      .black,
+                                                                  fontSize: 14,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w600,
+                                                                  height: 0,
+                                                                ));
+                                                          }
+                                                          return Row(children: [
+                                                            Image(
+                                                              image: img,
+                                                              width: 20,
+                                                            ),
+                                                            const SizedBox(
+                                                              width: 8,
+                                                            ),
+                                                            Text(
+                                                                data.data
+                                                                        ?.title ??
+                                                                    'NA',
+                                                                overflow:
+                                                                    TextOverflow
+                                                                        .ellipsis,
+                                                                style: GoogleFonts
+                                                                    .comfortaa(
+                                                                  color: Colors
+                                                                      .black,
+                                                                  // fontSize: 16,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w700,
+                                                                  height: 0,
+                                                                ))
+                                                          ]);
+                                                        },
+                                                        future: AnyLinkPreview
+                                                            .getMetadata(
+                                                                link:
+                                                                    p0.value!),
+                                                      )
+                                                    : const Text(
+                                                        'Enter meeting link...',
+                                                        overflow: TextOverflow
+                                                            .ellipsis,
+                                                      ),
+                                                c.meetingHolder),
+                                          ],
+                                        ),
+                                      ),
+                                      Align(
+                                        alignment: Alignment.topRight,
+                                        child: SvgPicture.asset(
+                                          'assets/images/ic_meeting_outlined.svg',
+                                          width: 16,
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                        c.virtual),
+                  ),
+                )
               ],
             ),
             const SizedBox(

@@ -211,109 +211,115 @@ class ViewEvent extends StatelessWidget {
                     ),
                   ),
                 ),
-                GestureDetector(
-                  onTap: () async {
-                    if (await canLaunchUrlString(event.meetingLink)) {
-                      launchUrlString(event.meetingLink, mode: LaunchMode.externalApplication);
-                    }
-                  },
-                  child: SizedBox(
-                    width: 160,
-                    child: ClipRect(
-                      child: DecoratedBox(
-                        decoration: ShapeDecoration(
-                          shape: RoundedRectangleBorder(
-                            side: const BorderSide(
-                                width: 1, color: Color(0xFFC6C6C6)),
-                            borderRadius: BorderRadius.circular(12),
+                Builder(builder: (_) {
+                  final link = event.meetingLink;
+                  if (link.trim().isEmpty) {
+                    return const SizedBox.shrink();
+                  }
+                  return GestureDetector(
+                    onTap: () async {
+                      if (await canLaunchUrlString(link)) {
+                        launchUrlString(link, mode: LaunchMode.externalApplication);
+                      }
+                    },
+                    child: SizedBox(
+                      width: 160,
+                      child: ClipRect(
+                        child: DecoratedBox(
+                          decoration: ShapeDecoration(
+                            shape: RoundedRectangleBorder(
+                              side: const BorderSide(
+                                  width: 1, color: Color(0xFFC6C6C6)),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                           ),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(10.0),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Flexible(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(
-                                      'Link to join',
-                                      style: GoogleFonts.nunito(
-                                        color: const Color(0xFF929292),
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w600,
-                                        height: 0,
+                          child: Padding(
+                            padding: const EdgeInsets.all(10.0),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Flexible(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        'Link to join',
+                                        style: GoogleFonts.nunito(
+                                          color: const Color(0xFF929292),
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w600,
+                                          height: 0,
+                                        ),
                                       ),
-                                    ),
-                                    FutureBuilder(
-                                      builder: (_, data) {
-                                        AnyLinkPreview.isValidLink(
-                                            event.meetingLink);
-                                        if (data.hasError) {
-                                          return Text(
-                                            'Unable to preview',
-                                            style: GoogleFonts.comfortaa(
-                                              color: Colors.black,
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w600,
-                                              height: 0,
-                                            ),
-                                            overflow: TextOverflow.ellipsis,
-                                          );
-                                        }
-                                        final img = _buildImageProvider(
-                                            data.data?.image);
-                                        if (img == null) {
-                                          return Text('Unable to preview',
+                                      FutureBuilder(
+                                        builder: (_, data) {
+                                          AnyLinkPreview.isValidLink(
+                                              link);
+                                          if (data.hasError) {
+                                            return Text(
+                                              'Unable to preview',
                                               style: GoogleFonts.comfortaa(
                                                 color: Colors.black,
                                                 fontSize: 14,
                                                 fontWeight: FontWeight.w600,
                                                 height: 0,
-                                              ));
-                                        }
-                                        return Row(children: [
-                                          Image(
-                                            image: img,
-                                            width: 20,
-                                          ),
-                                          const SizedBox(
-                                            width: 8,
-                                          ),
-                                          Text(data.data?.title ?? 'NA',
+                                              ),
                                               overflow: TextOverflow.ellipsis,
-                                              style: GoogleFonts.comfortaa(
-                                                color: Colors.black,
-                                                // fontSize: 16,
-                                                fontWeight: FontWeight.w700,
-                                                height: 0,
-                                              ))
-                                        ]);
-                                      },
-                                      future: AnyLinkPreview.getMetadata(
-                                          link: event.meetingLink),
-                                    )
-                                  ],
+                                            );
+                                          }
+                                          final img = _buildImageProvider(
+                                              data.data?.image);
+                                          if (img == null) {
+                                            return Text('Unable to preview',
+                                                style: GoogleFonts.comfortaa(
+                                                  color: Colors.black,
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w600,
+                                                  height: 0,
+                                                ));
+                                          }
+                                          return Row(children: [
+                                            Image(
+                                              image: img,
+                                              width: 20,
+                                            ),
+                                            const SizedBox(
+                                              width: 8,
+                                            ),
+                                            Text(data.data?.title ?? 'NA',
+                                                overflow: TextOverflow.ellipsis,
+                                                style: GoogleFonts.comfortaa(
+                                                  color: Colors.black,
+                                                  // fontSize: 16,
+                                                  fontWeight: FontWeight.w700,
+                                                  height: 0,
+                                                ))
+                                          ]);
+                                        },
+                                        future: AnyLinkPreview.getMetadata(
+                                            link: event.meetingLink),
+                                      )
+                                    ],
+                                  ),
                                 ),
-                              ),
-                              Align(
-                                alignment: Alignment.topRight,
-                                child: SvgPicture.asset(
-                                  'assets/images/ic_meeting_outlined.svg',
-                                  width: 16,
-                                ),
-                              )
-                            ],
+                                Align(
+                                  alignment: Alignment.topRight,
+                                  child: SvgPicture.asset(
+                                    'assets/images/ic_meeting_outlined.svg',
+                                    width: 16,
+                                  ),
+                                )
+                              ],
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                ),
+                  );
+                }),
                 SizedBox(
                   width: 160,
                   child: DecoratedBox(
@@ -428,6 +434,7 @@ class ViewEvent extends StatelessWidget {
                     backgroundColor: Colors.green,
                     textStyle: GoogleFonts.comfortaa(fontSize: 14)),
                 onPressed: () async {
+                  if (event.meetingLink.trim().isEmpty) return;
                   if (await canLaunchUrlString(event.meetingLink)) {
                     launchUrlString(event.meetingLink, mode: LaunchMode.externalApplication);
                   } else {
