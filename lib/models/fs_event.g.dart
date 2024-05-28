@@ -7,14 +7,24 @@ part of 'fs_event.dart';
 // **************************************************************************
 
 Event _$EventFromJson(Map<String, dynamic> json) => Event(
-      appName: json['appName'] as String,
-      created: const TimestampDatetimeConverter()
-          .fromJson(json['created'] as Timestamp),
-      edit: json['edit'] as bool? ?? false,
+      json['appName'] as String,
+      const TimestampDatetimeConverter().fromJson(json['meeting'] as Timestamp),
+      const DurationMillisConverter().fromJson(json['duration'] as int),
+      json['meetingLink'] as String,
+      json['clientName'] as String,
+      json['clientSegmentRefId'] as String,
+      json['prodMemRefId'] as String,
+      json['virtual'] as bool,
+      json['id'] as String? ?? "",
     );
 
 Map<String, dynamic> _$EventToJson(Event instance) => <String, dynamic>{
+      'duration': const DurationMillisConverter().toJson(instance.duration),
+      'meeting': const TimestampDatetimeConverter().toJson(instance.meeting),
+      'meetingLink': instance.meetingLink,
+      'clientName': instance.clientName,
+      'clientSegmentRefId': instance.clientSegmentRefId,
+      'prodMemRefId': instance.prodMemRefId,
       'appName': instance.appName,
-      'created': const TimestampDatetimeConverter().toJson(instance.created),
-      'edit': instance.edit,
+      'virtual': instance.virtual,
     };

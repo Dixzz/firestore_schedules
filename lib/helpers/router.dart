@@ -1,7 +1,6 @@
 import 'package:flutter/widgets.dart' show BuildContext, Widget;
 import 'package:get/get.dart';
-import 'package:scheduler/main.dart';
-import 'package:scheduler/pages/code_page.dart';
+import 'package:scheduler/pages/home.dart';
 
 
 generateRouter() {
@@ -17,7 +16,7 @@ generateRouter() {
 }
 
 enum Router {
-  root(className: CodePage(), path: ''),
+  root(className: Home(), path: ''),
   ;
 
   const Router({required this.className, required this.path});

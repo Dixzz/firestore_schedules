@@ -16,9 +16,12 @@ import 'package:omni_datetime_picker/src/variants/omni_datetime_picker_variants/
 import 'package:scheduler/helpers/dates.dart';
 import 'package:scheduler/helpers/iterables.dart';
 import 'package:scheduler/helpers/logger.dart';
-import 'package:scheduler/main.dart' show faClientMemColRef, faProdMemColRef;
+import 'package:scheduler/main.dart'
+    show faClientMemColRef, faEventColRef, faProdMemColRef;
 import 'package:scheduler/models/api_helper.dart';
+import 'package:scheduler/models/fs_event.dart';
 import 'package:scheduler/models/fs_product_member.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 class AddEventController extends GetxController {
   late final prodMembers = <ProductMember>[].obs;
@@ -26,11 +29,12 @@ class AddEventController extends GetxController {
   late final StreamSubscription<QuerySnapshot<ProductMember>>? _prodMembersSubs;
   late final StreamSubscription<QuerySnapshot<ProductMember>>? _clientsSubs;
   late final holder = Duration.zero.obs;
+  late final meetingLink = TextEditingController();
+  late final meetingHolder = RxnString();
 
   /// input fields
   late final duration = Duration.zero.obs;
   late final meeting = DateTime.now().obs;
-  late final meetingLink = TextEditingController();
   late final ctr = TextEditingController();
   late final appNameCtr = TextEditingController();
   late final clNameCtr = TextEditingController();
@@ -51,8 +55,37 @@ class AddEventController extends GetxController {
     });
   }
 
-  Future<void> save() async {
+  Future<void> save(Function(String) function) async {
+    final appName = appNameCtr.text;
+    final clientName = clNameCtr.text;
+    final meet = meetingHolder.value;
+    final clientSegmentRefId = clientMembers.getOrNull(clientIndex)?.name;
+    final prodMemRefId = prodMembers.getOrNull(prodIndex)?.name;
 
+    await faEventColRef
+        .add(Event(appName, meeting.value, duration.value, meet!, clientName,
+            clientSegmentRefId!, prodMemRefId!, virtual.value))
+        .then((value) {
+      reset();
+      Fluttertoast.showToast(msg: 'Saved');
+      Get.back();
+    }).onError((error, stackTrace) => function("Unable to create event"));
+  }
+
+  void reset() {
+    try {
+      clientMembers[clientIndex] = ProductMember(clientMembers[clientIndex].name, false);
+      prodMembers[prodIndex] = ProductMember(clientMembers[prodIndex].name, false);
+      prodIndex = -1;
+      clientIndex = -1;
+      ctr.clear();
+      virtual.value = false;
+      clNameCtr.clear();
+      meetingLink.clear();
+      appNameCtr.clear();
+    } catch(_) {
+
+    }
   }
 
   @override
@@ -199,7 +232,7 @@ class AddEvent extends StatelessWidget {
                       return GestureDetector(
                         onTap: () {
                           logit(
-                              "Updated ${element.toJson()} $index ${c.prodIndex}");
+                              "Updated ${element.toJson()} $index ${c.clientIndex}");
                           if (c.clientIndex == index) return;
                           if (c.clientIndex != -1) {
                             c.clientMembers[c.clientIndex] = ProductMember(
@@ -344,90 +377,106 @@ class AddEvent extends StatelessWidget {
               spacing: 8,
               runSpacing: 14,
               children: [
-                ObxValue(
-                    (p0) => SizedBox(
-                          width: 160,
-                          child: DecoratedBox(
-                            decoration: ShapeDecoration(
-                              shape: RoundedRectangleBorder(
-                                side: const BorderSide(
-                                    width: 1, color: Color(0xFFC6C6C6)),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(10.0),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Text(
-                                        'Date',
-                                        style: GoogleFonts.nunito(
-                                          color: const Color(0xFF929292),
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w600,
-                                          height: 0,
-                                        ),
-                                      ),
-                                      Text(
-                                        DatePatterns.eeeddmmmyy
-                                            .format(p0.value),
-                                        style: GoogleFonts.nunito(
-                                          color: Colors.black,
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w600,
-                                          height: 0,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  SvgPicture.asset(
-                                    'assets/images/ic_date_outlined.svg',
-                                    width: 16,
-                                  )
-                                ],
-                              ),
-                            ),
-                          ),
+                GestureDetector(
+                  onTap: () async {
+                    var res = await Get.dialog(Dialog(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                    c.meeting),
-                ObxValue(
-                    (p0) => SizedBox(
-                          width: 160,
-                          child: DecoratedBox(
-                            decoration: ShapeDecoration(
-                              shape: RoundedRectangleBorder(
-                                side: const BorderSide(
-                                    width: 1, color: Color(0xFFC6C6C6)),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: OmniDtpBasic(
+                            firstDate: DateTime.now(),
+                            type:
+                            OmniDateTimePickerType.dateAndTime,
+                          ),
+                        )));
+                    if (res is DateTime) {
+                      c.meeting.value = res;
+                    }
+                  },
+                  child: SizedBox(
+                    width: 160,
+                    child: DecoratedBox(
+                      decoration: ShapeDecoration(
+                        shape: RoundedRectangleBorder(
+                          side: const BorderSide(
+                              width: 1, color: Color(0xFFC6C6C6)),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  'Date',
+                                  style: GoogleFonts.nunito(
+                                    color: const Color(0xFF929292),
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    height: 0,
+                                  ),
+                                ),
+                                ObxValue(
+                                    (p0) => Text(
+                                          DatePatterns.eeeddmmmyy
+                                              .format(p0.value),
+                                          style: GoogleFonts.nunito(
+                                            color: Colors.black,
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w600,
+                                            height: 0,
+                                          ),
+                                        ),
+                                    c.meeting),
+                              ],
                             ),
-                            child: GestureDetector(
-                              onTap: () async {
-                                var res = await Get.dialog(Dialog(
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(12.0),
-                                      child: OmniDtpBasic(
-                                        firstDate: DateTime.now(),
-                                        type:
-                                            OmniDateTimePickerType.dateAndTime,
-                                      ),
-                                    )));
-                                if (res is DateTime) {
-                                  c.meeting.value = res;
-                                }
-                              },
+                            SvgPicture.asset(
+                              'assets/images/ic_date_outlined.svg',
+                              width: 16,
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                ObxValue(
+                    (p0) => GestureDetector(
+                          onTap: () async {
+                            var res = await Get.dialog(Dialog(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(12.0),
+                                  child: OmniDtpBasic(
+                                    firstDate: DateTime.now(),
+                                    type: OmniDateTimePickerType.dateAndTime,
+                                  ),
+                                )));
+                            if (res is DateTime) {
+                              c.meeting.value = res;
+                            }
+                          },
+                          child: SizedBox(
+                            width: 160,
+                            child: DecoratedBox(
+                              decoration: ShapeDecoration(
+                                shape: RoundedRectangleBorder(
+                                  side: const BorderSide(
+                                      width: 1, color: Color(0xFFC6C6C6)),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
                               child: Padding(
                                 padding: const EdgeInsets.all(10.0),
                                 child: Row(
@@ -451,7 +500,7 @@ class AddEvent extends StatelessWidget {
                                           ),
                                         ),
                                         Text(
-                                          TimePatterns.ddmmaa.format(p0.value),
+                                          TimePatterns.hhmmaa.format(p0.value),
                                           style: GoogleFonts.nunito(
                                             color: Colors.black,
                                             fontSize: 14,
@@ -472,192 +521,239 @@ class AddEvent extends StatelessWidget {
                           ),
                         ),
                     c.meeting),
-                SizedBox(
-                  width: 160,
-                  child: DecoratedBox(
-                    decoration: ShapeDecoration(
-                      shape: RoundedRectangleBorder(
-                        side: const BorderSide(
-                            width: 1, color: Color(0xFFC6C6C6)),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: GestureDetector(
-                      onTap: () async {
-                        Get.dialog(Dialog(
-                          backgroundColor: Colors.transparent,
-                          child: DecoratedBox(
-                            decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(16)),
-                            child: Padding(
-                              padding: const EdgeInsets.all(12.0),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const SizedBox(
-                                    height: 8,
-                                  ),
-                                  Text(
-                                    'Create meeting link',
-                                    style: GoogleFonts.comfortaa(fontSize: 16),
-                                  ),
-                                  const SizedBox(
-                                    height: 16,
-                                  ),
-                                  TextField(
-                                    controller: c.ctr,
-                                    autofocus: true,
-                                    style: GoogleFonts.nunito(),
-                                    decoration: const InputDecoration.collapsed(
-                                        hintText: 'Paste link'),
-                                    onSubmitted: (_) async {
-                                      await c.verify(faProdMemColRef);
-                                    },
-                                  ),
-                                  const SizedBox(
-                                    height: 24,
-                                  ),
-                                  Center(
-                                      child: FilledButton(
-                                          onPressed: () {
-                                            c.duration.value = c.holder.value;
-                                            Get.back();
-                                          },
-                                          child: const Text('Save')))
-                                ],
+                GestureDetector(
+                  onTap: () async {
+                    final bool res = await Get.dialog(Dialog(
+                      backgroundColor: Colors.transparent,
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16)),
+                        child: Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment:
+                            CrossAxisAlignment.start,
+                            children: [
+                              const SizedBox(
+                                height: 8,
                               ),
-                            ),
+                              Text(
+                                'Create meeting link',
+                                style: GoogleFonts.comfortaa(
+                                    fontSize: 16),
+                              ),
+                              const SizedBox(
+                                height: 16,
+                              ),
+                              TextField(
+                                autofocus: true,
+                                controller: c.meetingLink,
+                                style: GoogleFonts.nunito(),
+                                decoration:
+                                const InputDecoration.collapsed(
+                                    hintText: 'Paste link'),
+                                onSubmitted: (_) async {
+                                  Get.back(result: true);
+                                },
+                              ),
+                              const SizedBox(
+                                height: 24,
+                              ),
+                              Center(
+                                  child: FilledButton(
+                                      onPressed: () {
+                                        Get.back(result: true);
+                                      },
+                                      child: const Text('Save')))
+                            ],
                           ),
-                        ));
-                        // launchUrlString(
-                        //     'https://meet.google.com/dye-wojk-wzz?pli=1',
-                        //     mode: LaunchMode.externalApplication);
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.all(10.0),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  'Link to join',
-                                  style: GoogleFonts.nunito(
-                                    color: const Color(0xFF929292),
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
-                                    height: 0,
-                                  ),
-                                ),
-                                FutureBuilder(
-                                  builder: (_, data) {
-                                    AnyLinkPreview.isValidLink(
-                                        'https://meet.google.com/dye-wojk-wzz?pli=1');
-                                    if (data.hasError) {
-                                      return const Text('Unable to preview');
-                                    }
-                                    final img =
-                                        _buildImageProvider(data.data?.image);
-                                    if (img == null) {
-                                      return const Text('Unable to preview');
-                                    }
-                                    return Row(children: [
-                                      Image(
-                                        image: img,
-                                        width: 20,
+                        ),
+                      ),
+                    )) ??
+                        false;
+                    if (res) {
+                      c.meetingHolder.value = c.meetingLink.text;
+                      c.meetingLink.clear();
+                    }
+
+                    // launchUrlString(
+                    //     'https://meet.google.com/dye-wojk-wzz?pli=1',
+                    //     mode: LaunchMode.externalApplication);
+                  },
+                  child: SizedBox(
+                    width: 160,
+                    child: ClipRect(
+                      child: DecoratedBox(
+                        decoration: ShapeDecoration(
+                          shape: RoundedRectangleBorder(
+                            side: const BorderSide(
+                                width: 1, color: Color(0xFFC6C6C6)),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(10.0),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Flexible(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      'Link to join',
+                                      style: GoogleFonts.nunito(
+                                        color: const Color(0xFF929292),
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
+                                        height: 0,
                                       ),
-                                      const SizedBox(
-                                        width: 8,
-                                      ),
-                                      Text(data.data?.title ?? 'NA',
-                                          style: GoogleFonts.comfortaa(
-                                            color: Colors.black,
-                                            // fontSize: 16,
-                                            fontWeight: FontWeight.w700,
-                                            height: 0,
-                                          ))
-                                    ]);
-                                  },
-                                  future: AnyLinkPreview.getMetadata(
-                                      link:
-                                          'https://meet.google.com/dye-wojk-wzz?pli=1'),
+                                    ),
+                                    ObxValue(
+                                        (p0) => p0.value != null
+                                            ? FutureBuilder(
+                                                builder: (_, data) {
+                                                  AnyLinkPreview.isValidLink(
+                                                      p0.value!);
+                                                  if (data.hasError) {
+                                                    return Text(
+                                                      'Unable to preview',
+                                                      style:
+                                                          GoogleFonts.comfortaa(
+                                                        color: Colors.black,
+                                                        fontSize: 14,
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                        height: 0,
+                                                      ),
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                    );
+                                                  }
+                                                  final img =
+                                                      _buildImageProvider(
+                                                          data.data?.image);
+                                                  if (img == null) {
+                                                    return Text(
+                                                        'Unable to preview',
+                                                        style: GoogleFonts
+                                                            .comfortaa(
+                                                          color: Colors.black,
+                                                          fontSize: 14,
+                                                          fontWeight:
+                                                              FontWeight.w600,
+                                                          height: 0,
+                                                        ));
+                                                  }
+                                                  return Row(children: [
+                                                    Image(
+                                                      image: img,
+                                                      width: 20,
+                                                    ),
+                                                    const SizedBox(
+                                                      width: 8,
+                                                    ),
+                                                    Text(
+                                                        data.data?.title ??
+                                                            'NA',
+                                                        overflow: TextOverflow
+                                                            .ellipsis,
+                                                        style: GoogleFonts
+                                                            .comfortaa(
+                                                          color: Colors.black,
+                                                          // fontSize: 16,
+                                                          fontWeight:
+                                                              FontWeight.w700,
+                                                          height: 0,
+                                                        ))
+                                                  ]);
+                                                },
+                                                future:
+                                                    AnyLinkPreview.getMetadata(
+                                                        link: p0.value!),
+                                              )
+                                            : const Text(
+                                                'Enter meeting link...',
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                        c.meetingHolder),
+                                  ],
                                 ),
-                              ],
-                            ),
-                            Align(
-                              alignment: Alignment.topRight,
-                              child: SvgPicture.asset(
-                                'assets/images/ic_meeting_outlined.svg',
-                                width: 16,
                               ),
-                            )
-                          ],
+                              Align(
+                                alignment: Alignment.topRight,
+                                child: SvgPicture.asset(
+                                  'assets/images/ic_meeting_outlined.svg',
+                                  width: 16,
+                                ),
+                              )
+                            ],
+                          ),
                         ),
                       ),
                     ),
                   ),
                 ),
-                SizedBox(
-                  width: 160,
-                  child: DecoratedBox(
-                    decoration: ShapeDecoration(
-                      shape: RoundedRectangleBorder(
-                        side: const BorderSide(
-                            width: 1, color: Color(0xFFC6C6C6)),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: GestureDetector(
-                      onTap: () {
-                        Get.dialog(Dialog(
-                          backgroundColor: Colors.transparent,
-                          child: DecoratedBox(
-                            decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(16)),
-                            child: Padding(
-                              padding: const EdgeInsets.all(12.0),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const SizedBox(
-                                    height: 8,
-                                  ),
-                                  Text(
-                                    'Create meeting duration',
-                                    style: GoogleFonts.comfortaa(fontSize: 16),
-                                  ),
-                                  const SizedBox(
-                                    height: 16,
-                                  ),
-                                  Center(
-                                    child: ObxValue(
-                                        (p0) => DurationPicker(
-                                              onChange: c.holder,
-                                              duration: c.holder.value,
-                                            ),
-                                        c.holder),
-                                  ),
-                                  Center(
-                                      child: FilledButton(
-                                          onPressed: () {
-                                            c.duration.value = c.holder.value;
-                                            Get.back();
-                                          },
-                                          child: const Text('Save')))
-                                ],
+                GestureDetector(
+                  onTap: () {
+                    Get.dialog(Dialog(
+                      backgroundColor: Colors.transparent,
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16)),
+                        child: Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const SizedBox(
+                                height: 8,
                               ),
-                            ),
+                              Text(
+                                'Create meeting duration',
+                                style: GoogleFonts.comfortaa(fontSize: 16),
+                              ),
+                              const SizedBox(
+                                height: 16,
+                              ),
+                              Center(
+                                child: ObxValue(
+                                        (p0) => DurationPicker(
+                                      onChange: c.holder,
+                                      duration: c.holder.value,
+                                    ),
+                                    c.holder),
+                              ),
+                              Center(
+                                  child: FilledButton(
+                                      onPressed: () {
+                                        c.duration.value = c.holder.value;
+                                        Get.back();
+                                      },
+                                      child: const Text('Save')))
+                            ],
                           ),
-                        ));
-                      },
+                        ),
+                      ),
+                    ));
+                  },
+                  child: SizedBox(
+                    width: 160,
+                    child: DecoratedBox(
+                      decoration: ShapeDecoration(
+                        shape: RoundedRectangleBorder(
+                          side: const BorderSide(
+                              width: 1, color: Color(0xFFC6C6C6)),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
                       child: Padding(
                         padding: const EdgeInsets.all(10.0),
                         child: Row(
@@ -849,7 +945,11 @@ class AddEvent extends StatelessWidget {
                 style: FilledButton.styleFrom(
                     elevation: 4,
                     textStyle: GoogleFonts.comfortaa(fontSize: 14)),
-                onPressed: c.save,
+                onPressed: () async {
+                  await c.save((msg) {
+                    Fluttertoast.showToast(msg: msg);
+                  });
+                },
                 child: const Text('Create Event'),
               ),
             ),

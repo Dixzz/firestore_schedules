@@ -1,13 +1,12 @@
 import 'dart:async';
 
-import 'package:async/async.dart';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:implicitly_animated_reorderable_list/src/custom_sliver_animated_list.dart';
-import 'package:meta/meta.dart';
 
 import 'src.dart';
+import 'package:async/async.dart';
 
 typedef AnimatedItemBuilder<W extends Widget, E> = W Function(
     BuildContext context, Animation<double> animation, E item, int i);
@@ -233,7 +232,7 @@ abstract class ImplicitlyAnimatedListBaseState<W extends Widget,
 
     list.removeItem(
       index,
-      (context, animation) =>
+      (context, _,animation) =>
           removeItemBuilder?.call(context, animation, item) ??
           itemBuilder(context, animation, item, index),
       duration: widget.removeDuration,

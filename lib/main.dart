@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -5,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:scheduler/firebase_options.dart';
+import 'package:scheduler/helpers/logger.dart';
 import 'package:scheduler/helpers/router.dart' show generateRouter;
 import 'package:scheduler/models/fs_event.dart';
 import 'package:scheduler/models/fs_product_member.dart';
@@ -25,7 +28,7 @@ Future<void> main() async {
   final collectionClientMemRef = FirebaseFirestore.instance.collection('clients');
 
   faEventColRef = collectionRef.withConverter<Event>(
-    fromFirestore: (snapshot, _) => Event.fromJson(snapshot.data()!),
+    fromFirestore: (snapshot, _) => Event.fromJson(snapshot.data()!..['id'] = snapshot.id),
     toFirestore: (user, _) => user.toJson(),
   );
 

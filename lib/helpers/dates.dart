@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 enum DatePatterns {
@@ -15,7 +16,7 @@ enum DatePatterns {
 }
 
 enum TimePatterns {
-  ddmmaa('hh:mm aa'),
+  hhmmaa('hh:mm aa'),
   ;
 
   const TimePatterns(this._pattern);
