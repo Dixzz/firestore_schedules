@@ -4,6 +4,7 @@ import 'package:scheduler/pages/add_event.dart' show AddEventController;
 
 part 'fs_event.g.dart';
 
+
 class TimestampDatetimeConverter implements JsonConverter<DateTime, Timestamp> {
   const TimestampDatetimeConverter();
 

@@ -1,10 +1,15 @@
-targets:
-  $default:
-    builders:
-      json_serializable:
-        enabled: true
-        generate_for:
-          include:
-            - lib/models/**.dart
-#            - lib/**_bloc.dart
-#            - lib/**_cubit.dart
+#targets:
+#  $default:
+#    builders:
+#      json_serializable:
+#        enabled: true
+#        generate_for:
+#          include:
+#            - lib/models/**.dart
+#      floor_generator:
+#        enabled: true
+#        generate_for:
+#          include:
+#            - lib/models/**.dart
+##            - lib/**_bloc.dart
+##            - lib/**_cubit.dart
