@@ -28,9 +28,7 @@ part 'home_provider.dart';
 class HomeController extends GetxController {
   static const _field = 'meeting';
 
-  late final filterDate = DateTime
-      .now()
-      .obs;
+  late final filterDate = DateTime.now().obs;
 
   late final events = <Event>[].obs;
 
@@ -93,9 +91,7 @@ class _HomeState extends ConsumerState {
           .findAllPersons(now, endDate)
           .listen((event) {
         logit("Fetched items ${event.length} ${ref.read(rEventFilterBy)}");
-        ref
-            .read(rEventStateProvider.notifier)
-            .state = event;
+        ref.read(rEventStateProvider.notifier).state = event;
       });
       return;
     }
@@ -105,9 +101,7 @@ class _HomeState extends ConsumerState {
         .findAllPersonsFiltered(ref.read(rEventFilterBy), now, endDate)
         .listen((event) {
       logit("Fetched items ${event.length} ${ref.read(rEventFilterBy)}");
-      ref
-          .read(rEventStateProvider.notifier)
-          .state = event;
+      ref.read(rEventStateProvider.notifier).state = event;
     });
   }
 
@@ -160,22 +154,19 @@ class _HomeState extends ConsumerState {
                         onTap: () async {
                           var res = await showDialog(
                               context: context,
-                              builder: (_) =>
-                                  Dialog(
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      child: const Padding(
-                                        padding: EdgeInsets.all(12.0),
-                                        child: OmniDtpBasic(
-                                          type: OmniDateTimePickerType.date,
-                                        ),
-                                      )));
+                              builder: (_) => Dialog(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: const Padding(
+                                    padding: EdgeInsets.all(12.0),
+                                    child: OmniDtpBasic(
+                                      type: OmniDateTimePickerType.date,
+                                    ),
+                                  )));
                           if (res is DateTime) {
                             // re-fetch
-                            ref
-                                .read(dateStateProvider.notifier)
-                                .state = res;
+                            ref.read(dateStateProvider.notifier).state = res;
                           }
                         },
                         child: Row(
@@ -210,8 +201,7 @@ class _HomeState extends ConsumerState {
                     onTap: () async {
                       await showCustomModalBottomSheet(
                           context: context,
-                          builder: (_) =>
-                              AddREvent(
+                          builder: (_) => AddREvent(
                                 key: k,
                                 date: ref.read(dateStateProvider),
                               ),
@@ -256,275 +246,312 @@ class _HomeState extends ConsumerState {
                     duration: const Duration(milliseconds: 400),
                     child: selectedItem.isNotEmpty
                         ? ConstrainedBox(
-                      constraints: const BoxConstraints(minHeight: 75),
-                      child: Padding(
-                        padding:
-                        const EdgeInsets.symmetric(horizontal: 16),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment:
-                          MainAxisAlignment.spaceBetween,
-                          children: [
-                            Column(
-                              crossAxisAlignment:
-                              CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Selected',
-                                  style: GoogleFonts.comfortaa(
-                                      fontSize: 20,
-                                      color: const Color(0xff8E8E8E)),
-                                ),
-                                const SizedBox(
-                                  height: 8,
-                                ),
-                                Text(
-                                  '${selectedItem.length} ${selectedItem
-                                      .length == 1 ? "event" : "events"}',
-                                  style: GoogleFonts.comfortaa(
-                                      fontSize: 24,
-                                      fontWeight: FontWeight.w700),
-                                ),
-                              ],
+                            constraints: const BoxConstraints(minHeight: 75),
+                            child: Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 16),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Selected',
+                                        style: GoogleFonts.comfortaa(
+                                            fontSize: 20,
+                                            color: const Color(0xff8E8E8E)),
+                                      ),
+                                      const SizedBox(
+                                        height: 8,
+                                      ),
+                                      Text(
+                                        '${selectedItem.length} ${selectedItem.length == 1 ? "event" : "events"}',
+                                        style: GoogleFonts.comfortaa(
+                                            fontSize: 24,
+                                            fontWeight: FontWeight.w700),
+                                      ),
+                                    ],
+                                  ),
+                                  GestureDetector(
+                                      onTap: () async {
+                                        await Future.wait(selectedItem.map((e) => ref
+                                            .read(notifProvider)
+                                            .cancel(e.title.hashCode)));
+                                        await ref
+                                            .read(dbProvider)
+                                            .personDao
+                                            .deletePeople(
+                                                selectedItem.toImmutableList());
+                                      },
+                                      child: Image.asset(
+                                        'assets/images/ic_bin.png',
+                                        width: 20,
+                                      ))
+                                ],
+                              ),
                             ),
-                            GestureDetector(
-                                onTap: () async {
-                                  await ref
-                                      .read(dbProvider)
-                                      .personDao
-                                      .deletePeople(
-                                      selectedItem.toImmutableList());
-                                },
-                                child: Image.asset(
-                                  'assets/images/ic_bin.png',
-                                  width: 20,
-                                ))
-                          ],
-                        ),
-                      ),
-                    )
+                          )
                         : Row(
-                      children: [
-                        const SizedBox(
-                          width: 8,
-                        ),
-                        InkWell(
-                          onTap: () {
-                            showDialog(
-                                context: context,
-                                builder: (context) =>
-                                    Dialog(
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius:
-                                        BorderRadius.circular(12),
+                            children: [
+                              const SizedBox(
+                                width: 8,
+                              ),
+                              InkWell(
+                                onTap: () {
+                                  showDialog(
+                                      context: context,
+                                      builder: (context) => Dialog(
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                            ),
+                                            child: Padding(
+                                              padding: const EdgeInsets.all(12),
+                                              child: Column(
+                                                mainAxisSize: MainAxisSize.min,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.stretch,
+                                                children: [
+                                                  InkWell(
+                                                    onTap: () {
+                                                      ref
+                                                          .read(rEventFilterBy
+                                                              .notifier)
+                                                          .state = -1;
+                                                      Navigator.pop(context);
+                                                    },
+                                                    child: Padding(
+                                                      padding:
+                                                          const EdgeInsets.all(
+                                                              8.0),
+                                                      child: Row(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .spaceBetween,
+                                                        children: [
+                                                          const Text('All'),
+                                                          const SizedBox(
+                                                            width: 4,
+                                                          ),
+                                                          ref.read(rEventFilterBy) ==
+                                                                  -1
+                                                              ? const Icon(
+                                                                  Icons
+                                                                      .check_rounded,
+                                                                  size: 20,
+                                                                  color: Colors
+                                                                      .lightBlueAccent,
+                                                                )
+                                                              : const SizedBox
+                                                                  .shrink()
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  InkWell(
+                                                    onTap: () {
+                                                      ref
+                                                          .read(rEventFilterBy
+                                                              .notifier)
+                                                          .state = 0;
+                                                      Navigator.pop(context);
+                                                    },
+                                                    child: Padding(
+                                                      padding:
+                                                          const EdgeInsets.all(
+                                                              8.0),
+                                                      child: Row(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .spaceBetween,
+                                                        children: [
+                                                          const Text('High'),
+                                                          const SizedBox(
+                                                            width: 4,
+                                                          ),
+                                                          ref.read(rEventFilterBy) ==
+                                                                  0
+                                                              ? const Icon(
+                                                                  Icons
+                                                                      .check_rounded,
+                                                                  color: Colors
+                                                                      .lightBlueAccent,
+                                                                  size: 20,
+                                                                )
+                                                              : const SizedBox
+                                                                  .shrink()
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  InkWell(
+                                                    onTap: () {
+                                                      ref
+                                                          .read(rEventFilterBy
+                                                              .notifier)
+                                                          .state = -2;
+                                                      Navigator.pop(context);
+                                                    },
+                                                    child: Padding(
+                                                      padding:
+                                                          const EdgeInsets.all(
+                                                              8.0),
+                                                      child: Row(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .spaceBetween,
+                                                        children: [
+                                                          const Text('Medium'),
+                                                          const SizedBox(
+                                                            width: 4,
+                                                          ),
+                                                          ref.watch(rEventFilterBy) ==
+                                                                  -2
+                                                              ? const Icon(
+                                                                  Icons
+                                                                      .check_rounded,
+                                                                  color: Colors
+                                                                      .lightBlueAccent,
+                                                                  size: 20,
+                                                                )
+                                                              : const SizedBox
+                                                                  .shrink()
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  InkWell(
+                                                    onTap: () {
+                                                      ref
+                                                          .read(rEventFilterBy
+                                                              .notifier)
+                                                          .state = 1;
+                                                      Navigator.pop(context);
+                                                    },
+                                                    child: Padding(
+                                                      padding:
+                                                          const EdgeInsets.all(
+                                                              8.0),
+                                                      child: Row(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .spaceBetween,
+                                                        children: [
+                                                          const Text('Low'),
+                                                          const SizedBox(
+                                                            width: 4,
+                                                          ),
+                                                          ref.watch(rEventFilterBy) ==
+                                                                  1
+                                                              ? const Icon(
+                                                                  Icons
+                                                                      .check_rounded,
+                                                                  color: Colors
+                                                                      .lightBlueAccent,
+                                                                  size: 20,
+                                                                )
+                                                              : const SizedBox
+                                                                  .shrink()
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ));
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.only(
+                                      left: 8, right: 12, top: 6, bottom: 6),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Icon(
+                                        Icons.filter_list_rounded,
+                                        size: 24,
                                       ),
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(12),
-                                        child: Column(
-                                          mainAxisSize: MainAxisSize.min,
-                                          crossAxisAlignment:
-                                          CrossAxisAlignment.stretch,
-                                          children: [
-                                            InkWell(
-                                              onTap: () {
-                                                ref
-                                                    .read(rEventFilterBy
-                                                    .notifier)
-                                                    .state = -1;
-                                                Navigator.pop(context);
-                                              },
-                                              child: Padding(
-                                                padding:
-                                                const EdgeInsets.all(
-                                                    8.0),
-                                                child: Row(
-                                                  mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
-                                                  children: [
-                                                    const Text('All'),
-                                                    const SizedBox(
-                                                      width: 4,
-                                                    ),
-                                                    ref.read(rEventFilterBy) ==
-                                                        -1
-                                                        ? const Icon(
-                                                      Icons
-                                                          .check_rounded,
-                                                      size: 20,
-                                                      color: Colors
-                                                          .lightBlueAccent,
-                                                    )
-                                                        : const SizedBox
-                                                        .shrink()
-                                                  ],
-                                                ),
-                                              ),
-                                            ),
-                                            InkWell(
-                                              onTap: () {
-                                                ref
-                                                    .read(rEventFilterBy
-                                                    .notifier)
-                                                    .state = 0;
-                                                Navigator.pop(context);
-                                              },
-                                              child: Padding(
-                                                padding:
-                                                const EdgeInsets.all(
-                                                    8.0),
-                                                child: Row(
-                                                  mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
-                                                  children: [
-                                                    const Text('High'),
-                                                    const SizedBox(
-                                                      width: 4,
-                                                    ),
-                                                    ref.read(rEventFilterBy) ==
-                                                        0
-                                                        ? const Icon(
-                                                      Icons
-                                                          .check_rounded,
-                                                      color: Colors
-                                                          .lightBlueAccent,
-                                                      size: 20,
-                                                    )
-                                                        : const SizedBox
-                                                        .shrink()
-                                                  ],
-                                                ),
-                                              ),
-                                            ),
-                                            InkWell(
-                                              onTap: () {
-                                                ref
-                                                    .read(rEventFilterBy
-                                                    .notifier)
-                                                    .state = 1;
-                                                Navigator.pop(context);
-                                              },
-                                              child: Padding(
-                                                padding:
-                                                const EdgeInsets.all(
-                                                    8.0),
-                                                child: Row(
-                                                  mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
-                                                  children: [
-                                                    const Text('Low'),
-                                                    const SizedBox(
-                                                      width: 4,
-                                                    ),
-                                                    ref.watch(rEventFilterBy) ==
-                                                        1
-                                                        ? const Icon(
-                                                      Icons
-                                                          .check_rounded,
-                                                      color: Colors
-                                                          .lightBlueAccent,
-                                                      size: 20,
-                                                    )
-                                                        : const SizedBox
-                                                        .shrink()
-                                                  ],
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
+                                      const SizedBox(
+                                        width: 4,
                                       ),
-                                    ));
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.only(
-                                left: 8, right: 12, top: 6, bottom: 6),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(
-                                  Icons.filter_list_rounded,
-                                  size: 24,
+                                      Builder(builder: (_) {
+                                        final value = ref.watch(rEventFilterBy);
+                                        return Text(
+                                          value == -1
+                                              ? 'All'
+                                              : value == 0
+                                                  ? 'High'
+                                                  : value == -2
+                                                      ? 'Medium'
+                                                      : 'Low',
+                                          style: GoogleFonts.comfortaa(
+                                            color: Colors.black,
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w700,
+                                            height: 0,
+                                          ),
+                                        );
+                                      }),
+                                    ],
+                                  ),
                                 ),
-                                const SizedBox(
-                                  width: 4,
+                              ),
+                              const SizedBox(
+                                height: 40,
+                                width: 1,
+                                child: ColoredBox(
+                                  color: Colors.grey,
                                 ),
-                                Builder(builder: (_) {
-                                  final value = ref.watch(rEventFilterBy);
-                                  return Text(
-                                    value == -1
-                                        ? 'All'
-                                        : value == 0
-                                        ? 'High'
-                                        : 'Low',
-                                    style: GoogleFonts.comfortaa(
-                                      color: Colors.black,
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w700,
-                                      height: 0,
+                              ),
+                              Expanded(
+                                child: EasyDateTimeLine(
+                                  key: ValueKey(ref.read(dateStateProvider)),
+                                  initialDate: ref.read(dateStateProvider),
+                                  activeColor: const Color(0x334993ff),
+                                  headerProps:
+                                      const EasyHeaderProps(showHeader: false),
+                                  onDateChange: (res) {
+                                    ref.read(dateStateProvider.notifier).state =
+                                        res;
+                                  },
+                                  // timeLineProps: EasyTimeLineProps(
+                                  //   vPadding: 20,
+                                  // ),
+                                  dayProps: EasyDayProps(
+                                    height: 75,
+                                    width: 50,
+                                    dayStructure: DayStructure.dayStrDayNum,
+                                    inactiveDayStyle: DayStyle(
+                                      dayNumStyle: GoogleFonts.comfortaa(
+                                          fontSize: 22,
+                                          color: const Color(0xff7d7d7d),
+                                          fontWeight: FontWeight.w600),
+                                      dayStrStyle: GoogleFonts.comfortaa(
+                                          fontSize: 10,
+                                          color: const Color(0xff7d7d7d),
+                                          fontWeight: FontWeight.w600),
                                     ),
-                                  );
-                                }),
-                              ],
-                            ),
-                          ),
-                        ),
-                        const SizedBox(
-                          height: 40,
-                          width: 1,
-                          child: ColoredBox(
-                            color: Colors.grey,
-                          ),
-                        ),
-                        Expanded(
-                          child: EasyDateTimeLine(
-                            key: ValueKey(ref.read(dateStateProvider)),
-                            initialDate: ref.read(dateStateProvider),
-                            activeColor: const Color(0x334993ff),
-                            headerProps:
-                            const EasyHeaderProps(showHeader: false),
-                            onDateChange: (res) {
-                              ref
-                                  .read(dateStateProvider.notifier)
-                                  .state =
-                                  res;
-                            },
-                            // timeLineProps: EasyTimeLineProps(
-                            //   vPadding: 20,
-                            // ),
-                            dayProps: EasyDayProps(
-                              height: 75,
-                              width: 50,
-                              dayStructure: DayStructure.dayStrDayNum,
-                              inactiveDayStyle: DayStyle(
-                                dayNumStyle: GoogleFonts.comfortaa(
-                                    fontSize: 22,
-                                    color: const Color(0xff7d7d7d),
-                                    fontWeight: FontWeight.w600),
-                                dayStrStyle: GoogleFonts.comfortaa(
-                                    fontSize: 10,
-                                    color: const Color(0xff7d7d7d),
-                                    fontWeight: FontWeight.w600),
-                              ),
-                              activeDayStyle: DayStyle(
-                                dayNumStyle: GoogleFonts.comfortaa(
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.w700),
-                                dayStrStyle: GoogleFonts.comfortaa(
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w700),
-                                decoration: BoxDecoration(
-                                  color: const Color(0x334993ff),
-                                  borderRadius: BorderRadius.circular(24),
+                                    activeDayStyle: DayStyle(
+                                      dayNumStyle: GoogleFonts.comfortaa(
+                                          fontSize: 24,
+                                          fontWeight: FontWeight.w700),
+                                      dayStrStyle: GoogleFonts.comfortaa(
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w700),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0x334993ff),
+                                        borderRadius: BorderRadius.circular(24),
+                                      ),
+                                    ),
+                                  ),
                                 ),
                               ),
-                            ),
+                            ],
                           ),
-                        ),
-                      ],
-                    ),
                   ),
                   const SizedBox(
                     height: 16,
@@ -534,11 +561,11 @@ class _HomeState extends ConsumerState {
                           items: p0,
                           itemBuilder: (_, animation, event, index) {
                             final m = Tween(
-                                begin: const Offset(0, 0.2),
-                                end: Offset.zero)
+                                    begin: const Offset(0, 0.2),
+                                    end: Offset.zero)
                                 .animate(CurvedAnimation(
-                                parent: animation,
-                                curve: Curves.easeInCubic));
+                                    parent: animation,
+                                    curve: Curves.easeInCubic));
                             return GestureDetector(
                                 onTap: () async {
                                   if (p0.any((element) => element.edit)) {
@@ -555,10 +582,9 @@ class _HomeState extends ConsumerState {
                                         },
                                         shape: RoundedRectangleBorder(
                                           borderRadius:
-                                          BorderRadius.circular(12),
+                                              BorderRadius.circular(12),
                                         ),
-                                        builder: (_) =>
-                                            AddREvent(
+                                        builder: (_) => AddREvent(
                                               event: event,
                                               key: k,
                                             ));
@@ -583,65 +609,83 @@ class _HomeState extends ConsumerState {
                                                 ? const Color(0xfff0f0f0)
                                                 : const Color(0xFFEDF4FF),
                                             borderRadius:
-                                            BorderRadius.circular(32)),
+                                                BorderRadius.circular(32)),
                                         duration:
-                                        const Duration(milliseconds: 400),
+                                            const Duration(milliseconds: 400),
                                         child: Column(
                                           crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                                              CrossAxisAlignment.start,
                                           children: [
                                             Row(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              mainAxisAlignment: MainAxisAlignment.start,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.start,
                                               children: [
-                                                const SizedBox(width: 16,),
+                                                const SizedBox(
+                                                  width: 16,
+                                                ),
                                                 Expanded(
                                                   child: Column(
-                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
                                                     children: [
-                                                      const SizedBox(height: 16,),
+                                                      const SizedBox(
+                                                        height: 16,
+                                                      ),
                                                       Text(
                                                         event.title,
                                                         style: GoogleFonts
                                                             .comfortaa(
-                                                            fontSize: 24,
-                                                            fontWeight: FontWeight
-                                                                .w700),
+                                                                fontSize: 24,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w700),
                                                       ),
                                                     ],
                                                   ),
                                                 ),
-                                                event.priority != -1 ? Transform
-                                                    .translate(
-                                                  offset: const Offset(5, 0),
-                                                  child: DecoratedBox(
-                                                    decoration: const BoxDecoration(
-                                                        color:
-                                                        Color(0x265E5E5E),
-                                                        borderRadius:
-                                                        BorderRadius.only(
-                                                            bottomLeft: Radius
-                                                                .circular(
-                                                                24),
-                                                            topRight: Radius
-                                                                .circular(
-                                                                24))),
-                                                    child: Padding(
-                                                      padding:
-                                                      const EdgeInsets.only(
-                                                          left: 16,
-                                                          right: 24,
-                                                          top: 6,
-                                                          bottom: 6),
-                                                      child: Text(
-                                                        event.priority == 0 ? 'high' : 'low',
-                                                        style: GoogleFonts
-                                                            .comfortaa(
-                                                            fontSize: 12),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ) : const SizedBox.shrink(),
+                                                event.priority != -1
+                                                    ? Transform.translate(
+                                                        offset:
+                                                            const Offset(5, 0),
+                                                        child: DecoratedBox(
+                                                          decoration: const BoxDecoration(
+                                                              color: Color(
+                                                                  0x265E5E5E),
+                                                              borderRadius: BorderRadius.only(
+                                                                  bottomLeft: Radius
+                                                                      .circular(
+                                                                          24),
+                                                                  topRight: Radius
+                                                                      .circular(
+                                                                          24))),
+                                                          child: Padding(
+                                                            padding:
+                                                                const EdgeInsets
+                                                                        .only(
+                                                                    left: 16,
+                                                                    right: 24,
+                                                                    top: 6,
+                                                                    bottom: 6),
+                                                            child: Text(
+                                                              event.priority ==
+                                                                      0
+                                                                  ? 'high'
+                                                                  : event.priority ==
+                                                                          -2
+                                                                      ? 'Medium'
+                                                                      : 'low',
+                                                              style: GoogleFonts
+                                                                  .comfortaa(
+                                                                      fontSize:
+                                                                          12),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      )
+                                                    : const SizedBox.shrink(),
                                               ],
                                             ),
                                             const SizedBox(
@@ -649,9 +693,11 @@ class _HomeState extends ConsumerState {
                                             ),
                                             Row(
                                               crossAxisAlignment:
-                                              CrossAxisAlignment.end,
+                                                  CrossAxisAlignment.end,
                                               children: [
-                                                const SizedBox(width: 16,),
+                                                const SizedBox(
+                                                  width: 16,
+                                                ),
                                                 Image.asset(
                                                   'assets/images/ic_clock_tinted.png',
                                                   width: 20,
@@ -664,11 +710,13 @@ class _HomeState extends ConsumerState {
                                                       .format(event.event),
                                                   style: GoogleFonts.comfortaa(
                                                       fontWeight:
-                                                      FontWeight.w600),
+                                                          FontWeight.w600),
                                                 ),
                                               ],
                                             ),
-                                            const SizedBox(height: 16,),
+                                            const SizedBox(
+                                              height: 16,
+                                            ),
                                           ],
                                         )),
                                   ),
@@ -731,8 +779,7 @@ class _HomeState extends ConsumerState {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             ObxValue(
-                                    (p0) =>
-                                    Text(
+                                (p0) => Text(
                                       DatePatterns.eeeddmmm.format(p0.value),
                                       textAlign: TextAlign.center,
                                       style: GoogleFonts.comfortaa(
@@ -794,79 +841,75 @@ class _HomeState extends ConsumerState {
           ),
           Expanded(
               child: ObxValue((p0) {
-                logit("Wew ${p0.length}");
-                final selectedItemCount = p0.where((p0) => p0.edit);
-                return Column(
-                  children: [
-                    AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 400),
-                      child: selectedItemCount.isNotEmpty
-                          ? ConstrainedBox(
-                        constraints: const BoxConstraints(minHeight: 75),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Selected',
-                                    style: GoogleFonts.comfortaa(
-                                        fontSize: 20,
-                                        color: const Color(0xff8E8E8E)),
-                                  ),
-                                  const SizedBox(
-                                    height: 8,
-                                  ),
-                                  Text(
-                                    '${selectedItemCount
-                                        .length} ${selectedItemCount.length == 1
-                                        ? "event"
-                                        : "events"}',
-                                    style: GoogleFonts.comfortaa(
-                                        fontSize: 24,
-                                        fontWeight: FontWeight.w700),
-                                  ),
-                                ],
-                              ),
-                              GestureDetector(
-                                  onTap: () async {
-                                    var batches =
-                                    chunk(selectedItemCount, 100);
-                                    var commitBatchPromises =
-                                    <Future<void>>[];
+            logit("Wew ${p0.length}");
+            final selectedItemCount = p0.where((p0) => p0.edit);
+            return Column(
+              children: [
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 400),
+                  child: selectedItemCount.isNotEmpty
+                      ? ConstrainedBox(
+                          constraints: const BoxConstraints(minHeight: 75),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Selected',
+                                      style: GoogleFonts.comfortaa(
+                                          fontSize: 20,
+                                          color: const Color(0xff8E8E8E)),
+                                    ),
+                                    const SizedBox(
+                                      height: 8,
+                                    ),
+                                    Text(
+                                      '${selectedItemCount.length} ${selectedItemCount.length == 1 ? "event" : "events"}',
+                                      style: GoogleFonts.comfortaa(
+                                          fontSize: 24,
+                                          fontWeight: FontWeight.w700),
+                                    ),
+                                  ],
+                                ),
+                                GestureDetector(
+                                    onTap: () async {
+                                      var batches =
+                                          chunk(selectedItemCount, 100);
+                                      var commitBatchPromises =
+                                          <Future<void>>[];
 
-                                    for (var batch in batches) {
-                                      var writeBatch =
-                                      FirebaseFirestore.instance.batch();
-                                      for (var element in batch) {
-                                        writeBatch.delete(
-                                            faEventColRef.doc(element.id));
+                                      for (var batch in batches) {
+                                        var writeBatch =
+                                            FirebaseFirestore.instance.batch();
+                                        for (var element in batch) {
+                                          writeBatch.delete(
+                                              faEventColRef.doc(element.id));
+                                        }
+                                        commitBatchPromises
+                                            .add(writeBatch.commit());
+                                        await Future.wait(commitBatchPromises);
                                       }
-                                      commitBatchPromises
-                                          .add(writeBatch.commit());
-                                      await Future.wait(commitBatchPromises);
-                                    }
-                                  },
-                                  child: Image.asset(
-                                    'assets/images/ic_bin.png',
-                                    width: 20,
-                                  ))
-                            ],
+                                    },
+                                    child: Image.asset(
+                                      'assets/images/ic_bin.png',
+                                      width: 20,
+                                    ))
+                              ],
+                            ),
                           ),
-                        ),
-                      )
-                          : ObxValue(
-                              (p0) =>
-                              EasyDateTimeLine(
+                        )
+                      : ObxValue(
+                          (p0) => EasyDateTimeLine(
                                 key: ValueKey(p0.value),
                                 initialDate: p0.value,
                                 activeColor: const Color(0x334993ff),
                                 headerProps:
-                                const EasyHeaderProps(showHeader: false),
+                                    const EasyHeaderProps(showHeader: false),
                                 onDateChange: (res) {
                                   c
                                     ..filterDate.value = res
@@ -905,25 +948,25 @@ class _HomeState extends ConsumerState {
                                 ),
                               ),
                           c.filterDate),
-                    ),
-                    const SizedBox(
-                      height: 16,
-                    ),
-                    Expanded(
-                      child: AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 400),
-                        child: p0.isEmpty
-                            ? const Text('--- Nothing to see here ---')
-                            : ImplicitlyAnimatedList(
+                ),
+                const SizedBox(
+                  height: 16,
+                ),
+                Expanded(
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 400),
+                    child: p0.isEmpty
+                        ? const Text('--- Nothing to see here ---')
+                        : ImplicitlyAnimatedList(
                             items: p0,
                             itemBuilder: (_, animation, event, index) {
                               logit("wew built $index ${event.toJson()}");
                               final m = Tween(
-                                  begin: const Offset(0, 0.2),
-                                  end: Offset.zero)
+                                      begin: const Offset(0, 0.2),
+                                      end: Offset.zero)
                                   .animate(CurvedAnimation(
-                                  parent: animation,
-                                  curve: Curves.easeInCubic));
+                                      parent: animation,
+                                      curve: Curves.easeInCubic));
                               return GestureDetector(
                                 onTap: () {
                                   if (p0.any((element) => element.edit)) {
@@ -956,33 +999,33 @@ class _HomeState extends ConsumerState {
                                                 ? const Color(0xfff0f0f0)
                                                 : const Color(0xFFEDF4FF),
                                             borderRadius:
-                                            BorderRadius.circular(32)),
+                                                BorderRadius.circular(32)),
                                         duration:
-                                        const Duration(milliseconds: 400),
+                                            const Duration(milliseconds: 400),
                                         child: Column(
                                           crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                                              CrossAxisAlignment.start,
                                           children: [
                                             Row(
                                               crossAxisAlignment:
-                                              CrossAxisAlignment.start,
+                                                  CrossAxisAlignment.start,
                                               children: [
                                                 Expanded(
                                                   child: Padding(
                                                     padding:
-                                                    const EdgeInsets.only(
-                                                        right: 16,
-                                                        left: 16,
-                                                        top: 16,
-                                                        bottom: 8),
+                                                        const EdgeInsets.only(
+                                                            right: 16,
+                                                            left: 16,
+                                                            top: 16,
+                                                            bottom: 8),
                                                     child: Text(
                                                       p0[index].appName,
                                                       style:
-                                                      GoogleFonts.comfortaa(
-                                                          fontSize: 20,
-                                                          fontWeight:
-                                                          FontWeight
-                                                              .w700),
+                                                          GoogleFonts.comfortaa(
+                                                              fontSize: 20,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w700),
                                                     ),
                                                   ),
                                                 ),
@@ -991,28 +1034,28 @@ class _HomeState extends ConsumerState {
                                                   child: DecoratedBox(
                                                     decoration: const BoxDecoration(
                                                         color:
-                                                        Color(0x265E5E5E),
+                                                            Color(0x265E5E5E),
                                                         borderRadius:
-                                                        BorderRadius.only(
-                                                            bottomLeft: Radius
-                                                                .circular(
-                                                                24),
-                                                            topRight: Radius
-                                                                .circular(
-                                                                24))),
+                                                            BorderRadius.only(
+                                                                bottomLeft: Radius
+                                                                    .circular(
+                                                                        24),
+                                                                topRight: Radius
+                                                                    .circular(
+                                                                        24))),
                                                     child: Padding(
                                                       padding:
-                                                      const EdgeInsets.only(
-                                                          left: 16,
-                                                          right: 24,
-                                                          top: 6,
-                                                          bottom: 6),
+                                                          const EdgeInsets.only(
+                                                              left: 16,
+                                                              right: 24,
+                                                              top: 6,
+                                                              bottom: 6),
                                                       child: Text(
                                                         p0[index]
                                                             .clientSegmentRefId,
                                                         style: GoogleFonts
                                                             .comfortaa(
-                                                            fontSize: 12),
+                                                                fontSize: 12),
                                                       ),
                                                     ),
                                                   ),
@@ -1026,19 +1069,19 @@ class _HomeState extends ConsumerState {
                                                   bottom: 16),
                                               child: Column(
                                                 crossAxisAlignment:
-                                                CrossAxisAlignment.start,
+                                                    CrossAxisAlignment.start,
                                                 children: [
                                                   Text(
                                                     p0[index].clientName,
                                                     style:
-                                                    GoogleFonts.comfortaa(),
+                                                        GoogleFonts.comfortaa(),
                                                   ),
                                                   const SizedBox(
                                                     height: 16,
                                                   ),
                                                   Row(
                                                     crossAxisAlignment:
-                                                    CrossAxisAlignment.end,
+                                                        CrossAxisAlignment.end,
                                                     children: [
                                                       Image.asset(
                                                         'assets/images/ic_clock_tinted.png',
@@ -1050,12 +1093,12 @@ class _HomeState extends ConsumerState {
                                                       Text(
                                                         TimePatterns.hhmmaa
                                                             .format(p0[index]
-                                                            .meeting),
+                                                                .meeting),
                                                         style: GoogleFonts
                                                             .comfortaa(
-                                                            fontWeight:
-                                                            FontWeight
-                                                                .w600),
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w600),
                                                       ),
                                                       const SizedBox(
                                                         width: 8,
@@ -1073,14 +1116,14 @@ class _HomeState extends ConsumerState {
                                                       Text(
                                                         TimePatterns.hhmmaa
                                                             .format(p0[index]
-                                                            .meeting
-                                                            .add(p0[index]
-                                                            .duration)),
+                                                                .meeting
+                                                                .add(p0[index]
+                                                                    .duration)),
                                                         style: GoogleFonts
                                                             .comfortaa(
-                                                            fontWeight:
-                                                            FontWeight
-                                                                .w600),
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w600),
                                                       ),
                                                     ],
                                                   )
@@ -1096,11 +1139,11 @@ class _HomeState extends ConsumerState {
                             areItemsTheSame: (a, b) {
                               return a == b;
                             }),
-                      ),
-                    ),
-                  ],
-                );
-              }, c.events)),
+                  ),
+                ),
+              ],
+            );
+          }, c.events)),
         ],
       ),
     );

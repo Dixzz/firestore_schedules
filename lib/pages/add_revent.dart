@@ -317,6 +317,36 @@ class AddREventState extends ConsumerState {
                 ),
                 GestureDetector(
                   onTap: () {
+                    ref.read(_priorityStateProvider.notifier).state = -2;
+                  },
+                  child: DecoratedBox(
+                    decoration: ShapeDecoration(
+                      color: ref.watch(_priorityStateProvider) == -2
+                          ? Colors.blue.shade50
+                          : const Color(0xFFF9F9F9),
+                      shape: RoundedRectangleBorder(
+                        side: const BorderSide(
+                            width: .5, color: Color(0xFFBDBDBD)),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 6),
+                      child: Text(
+                        'Medium',
+                        style: GoogleFonts.comfortaa(
+                          color: Colors.black,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          height: 0,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () {
                     ref.read(_priorityStateProvider.notifier).state = 1;
                   },
                   child: DecoratedBox(
