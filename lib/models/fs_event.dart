@@ -45,12 +45,13 @@ class Event {
   final String prodMemRefId;
   final String appName;
   final bool virtual;
+  final String bdRefId;
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   final bool edit;
 
   const Event(this.appName, this.meeting, this.duration, this.meetingLink,
-      this.clientName, this.clientSegmentRefId, this.prodMemRefId, this.virtual,
+      this.clientName, this.clientSegmentRefId, this.prodMemRefId, this.virtual, this.bdRefId,
       [this.id = "", this.edit = false]);
 
   factory Event.fromJson(Map<String, dynamic> json) => _$EventFromJson(json);
@@ -60,6 +61,6 @@ class Event {
 
   Event updateEdit(final bool edit) {
     return Event(appName, meeting, duration, meetingLink, clientName,
-        clientSegmentRefId, prodMemRefId, virtual, id, edit);
+        clientSegmentRefId, prodMemRefId, virtual, bdRefId, id, edit);
   }
 }

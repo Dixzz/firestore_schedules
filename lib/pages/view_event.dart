@@ -108,7 +108,7 @@ class ViewEvent extends StatelessWidget {
               height: 16,
             ),
             Wrap(
-              spacing: 8,
+              // spacing: 8,
               runSpacing: 14,
               children: [
                 SizedBox(
@@ -161,6 +161,7 @@ class ViewEvent extends StatelessWidget {
                     ),
                   ),
                 ),
+                const SizedBox(width: 8,),
                 SizedBox(
                   width: 160,
                   child: DecoratedBox(

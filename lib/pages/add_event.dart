@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:any_link_preview/any_link_preview.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -17,16 +18,18 @@ import 'package:scheduler/helpers/dates.dart';
 import 'package:scheduler/helpers/iterables.dart';
 import 'package:scheduler/helpers/logger.dart';
 import 'package:scheduler/main.dart'
-    show faClientMemColRef, faEventColRef, faProdMemColRef;
+    show faClientMemColRef, faEventColRef, faProdMemColRef, getUser, pref;
 import 'package:scheduler/models/api_helper.dart';
 import 'package:scheduler/models/fs_event.dart';
 import 'package:scheduler/models/fs_product_member.dart';
 
+import '../models/fs_client_member.dart';
+
 class AddEventController extends GetxController {
-  late final prodMembers = <ProductMember>[].obs;
-  late final clientMembers = <ProductMember>[].obs;
-  late final StreamSubscription<QuerySnapshot<ProductMember>>? _prodMembersSubs;
-  late final StreamSubscription<QuerySnapshot<ProductMember>>? _clientsSubs;
+  late final prodMembers = <Member>[].obs;
+  late final clientMembers = <ClientMember>[].obs;
+  late final StreamSubscription<QuerySnapshot<Member>>? _prodMembersSubs;
+  late final StreamSubscription<QuerySnapshot<ClientMember>>? _clientsSubs;
   late final holder = Duration.zero.obs;
   late final meetingLink = TextEditingController();
   late final meetingHolder = RxnString();
@@ -62,8 +65,16 @@ class AddEventController extends GetxController {
     final prodMemRefId = prodMembers.getOrNull(prodIndex)?.name;
 
     await faEventColRef
-        .add(Event(appName, meeting.value, duration.value, meet!, clientName,
-            clientSegmentRefId!, prodMemRefId!, virtual.value))
+        .add(Event(
+            appName,
+            meeting.value,
+            duration.value,
+            meet ?? '',
+            clientName,
+            clientSegmentRefId!,
+            prodMemRefId!,
+            virtual.value,
+            (await getUser()).id))
         .then((value) {
       reset();
       Fluttertoast.showToast(msg: 'Saved');
@@ -73,10 +84,8 @@ class AddEventController extends GetxController {
 
   void reset() {
     try {
-      clientMembers[clientIndex] =
-          ProductMember(clientMembers[clientIndex].name, false);
-      prodMembers[prodIndex] =
-          ProductMember(clientMembers[prodIndex].name, false);
+      clientMembers[clientIndex] = clientMembers[clientIndex].toggleEdit(false);
+      prodMembers[prodIndex] = prodMembers[prodIndex].toggleEdit(false);
       prodIndex = -1;
       clientIndex = -1;
       ctr.clear();
@@ -99,20 +108,18 @@ class AddEventController extends GetxController {
     appNameCtr.dispose();
   }
 
-  Future<void> verify(
-      CollectionReference<ProductMember> faClientMemColRef) async {
-    logit("Checking ${ctr.text}");
-    (await faClientMemColRef
-            .where('name', isEqualTo: ctr.text)
-            .get()
-            .then((value) {
+  Future<void> verify() async {
+    final text = ctr.text;
+    logit("Checking $text $faClientMemColRef");
+    (await faClientMemColRef.where('name', isEqualTo: text).get().then((value) {
       return ApiResult.success(value.docs.isEmpty);
     }).onError((_, __) => const ApiResult.error("Unable to fetch")))
-        .whenOrNull(success: (d) {
+        .whenOrNull(success: (d) async {
       if (!d) {
         Fluttertoast.showToast(
             msg: 'Member exists retry...', gravity: ToastGravity.CENTER);
       } else {
+        await faClientMemColRef.add(ClientMember(text));
         Fluttertoast.showToast(msg: 'Created', gravity: ToastGravity.TOP);
         if (Get.isDialogOpen == true) {
           Get.back();
@@ -217,7 +224,6 @@ class AddEvent extends StatelessWidget {
             Align(
               alignment: Alignment.topLeft,
               child: ObxValue((p0) {
-                logit("Built ${p0.toJson()}");
                 var i = -1;
                 return Wrap(
                   spacing: 8,
@@ -234,11 +240,11 @@ class AddEvent extends StatelessWidget {
                               "Updated ${element.toJson()} $index ${c.clientIndex}");
                           if (c.clientIndex == index) return;
                           if (c.clientIndex != -1) {
-                            c.clientMembers[c.clientIndex] = ProductMember(
-                                c.clientMembers[c.clientIndex].name, false);
+                            c.clientMembers[c.clientIndex] = c
+                                .clientMembers[c.clientIndex]
+                                .toggleEdit(false);
                           }
-                          c.clientMembers[index] =
-                              ProductMember(element.name, !element.edit);
+                          c.clientMembers[index] = element.toggleEdit();
                           c.clientIndex = index;
                         },
                         child: DecoratedBox(
@@ -297,7 +303,7 @@ class AddEvent extends StatelessWidget {
                                     decoration: const InputDecoration.collapsed(
                                         hintText: 'Enter name'),
                                     onSubmitted: (_) async {
-                                      await c.verify(faClientMemColRef);
+                                      await c.verify();
                                     },
                                   ),
                                   const SizedBox(
@@ -305,9 +311,7 @@ class AddEvent extends StatelessWidget {
                                   ),
                                   Center(
                                     child: FilledButton(
-                                        onPressed: () async {
-                                          await c.verify(faClientMemColRef);
-                                        },
+                                        onPressed: c.verify,
                                         child: const Text('Create')),
                                   ),
                                 ],
@@ -621,59 +625,53 @@ class AddEvent extends StatelessWidget {
                 ),
                 GestureDetector(
                   onTap: () async {
-                    if(c.virtual.value) return;
+                    if (c.virtual.value) return;
                     final bool res = await Get.dialog(Dialog(
-                      backgroundColor: Colors.transparent,
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius:
-                            BorderRadius.circular(16)),
-                        child: Padding(
-                          padding: const EdgeInsets.all(12.0),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment:
-                            CrossAxisAlignment.start,
-                            children: [
-                              const SizedBox(
-                                height: 8,
+                          backgroundColor: Colors.transparent,
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(16)),
+                            child: Padding(
+                              padding: const EdgeInsets.all(12.0),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const SizedBox(
+                                    height: 8,
+                                  ),
+                                  Text(
+                                    'Create meeting link',
+                                    style: GoogleFonts.comfortaa(fontSize: 16),
+                                  ),
+                                  const SizedBox(
+                                    height: 16,
+                                  ),
+                                  TextField(
+                                    autofocus: true,
+                                    controller: c.meetingLink,
+                                    style: GoogleFonts.nunito(),
+                                    decoration: const InputDecoration.collapsed(
+                                        hintText: 'Paste link'),
+                                    onSubmitted: (_) async {
+                                      Get.back(result: true);
+                                    },
+                                  ),
+                                  const SizedBox(
+                                    height: 24,
+                                  ),
+                                  Center(
+                                      child: FilledButton(
+                                          onPressed: () {
+                                            Get.back(result: true);
+                                          },
+                                          child: const Text('Save')))
+                                ],
                               ),
-                              Text(
-                                'Create meeting link',
-                                style: GoogleFonts.comfortaa(
-                                    fontSize: 16),
-                              ),
-                              const SizedBox(
-                                height: 16,
-                              ),
-                              TextField(
-                                autofocus: true,
-                                controller: c.meetingLink,
-                                style: GoogleFonts.nunito(),
-                                decoration:
-                                const InputDecoration
-                                    .collapsed(
-                                    hintText: 'Paste link'),
-                                onSubmitted: (_) async {
-                                  Get.back(result: true);
-                                },
-                              ),
-                              const SizedBox(
-                                height: 24,
-                              ),
-                              Center(
-                                  child: FilledButton(
-                                      onPressed: () {
-                                        Get.back(result: true);
-                                      },
-                                      child:
-                                      const Text('Save')))
-                            ],
+                            ),
                           ),
-                        ),
-                      ),
-                    )) ??
+                        )) ??
                         false;
                     if (res) {
                       c.meetingHolder.value = c.meetingLink.text;
@@ -853,11 +851,10 @@ class AddEvent extends StatelessWidget {
 
                           /// deselect old
                           if (c.prodIndex != -1) {
-                            c.prodMembers[c.prodIndex] = ProductMember(
-                                c.prodMembers[c.prodIndex].name, false);
+                            c.prodMembers[c.prodIndex] =
+                                c.prodMembers[c.prodIndex].toggleEdit(false);
                           }
-                          c.prodMembers[index] =
-                              ProductMember(element.name, !element.edit);
+                          c.prodMembers[index] = element.toggleEdit();
                           c.prodIndex = index;
                         },
                         child: DecoratedBox(
@@ -889,66 +886,6 @@ class AddEvent extends StatelessWidget {
                         ),
                       );
                     }),
-                    GestureDetector(
-                      onTap: () {
-                        Get.dialog(Dialog(
-                          backgroundColor: Colors.transparent,
-                          child: DecoratedBox(
-                            decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(12)),
-                            child: Padding(
-                              padding: const EdgeInsets.all(12.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text('Add Product Member',
-                                      style:
-                                          GoogleFonts.comfortaa(fontSize: 18)),
-                                  const SizedBox(
-                                    height: 16,
-                                  ),
-                                  TextField(
-                                    controller: c.ctr,
-                                    autofocus: true,
-                                    style: GoogleFonts.nunito(),
-                                    decoration: const InputDecoration.collapsed(
-                                        hintText: 'Enter name'),
-                                    onSubmitted: (_) async {
-                                      await c.verify(faProdMemColRef);
-                                    },
-                                  ),
-                                  const SizedBox(
-                                    height: 24,
-                                  ),
-                                  Center(
-                                    child: FilledButton(
-                                        onPressed: () async {
-                                          await c.verify(faProdMemColRef);
-                                        },
-                                        child: const Text('Create')),
-                                  )
-                                ],
-                              ),
-                            ),
-                          ),
-                        ));
-                      },
-                      child: DecoratedBox(
-                          decoration: BoxDecoration(
-                            border: Border.all(color: const Color(0x804993FF)),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const SizedBox.square(
-                            dimension: 20,
-                            child: Icon(
-                              Icons.add_rounded,
-                              size: 16,
-                              color: Color(0xFF4993FF),
-                            ),
-                          )),
-                    ),
                   ],
                 );
               }, c.prodMembers),

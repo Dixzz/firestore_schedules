@@ -58,12 +58,13 @@ class HomeController extends GetxController {
 }
 
 class Home extends StatelessWidget {
+  HomeController get c => Get.find();
+
   const Home({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     logit("wew built main");
-    final HomeController c = Get.put(HomeController());
 
     return Scaffold(
       body: Column(
@@ -108,17 +109,22 @@ class Home extends StatelessWidget {
                               ..fetchEvents();
                           }
                         },
-                        child: Row(mainAxisSize: MainAxisSize.min,children: [
-                          ObxValue(
-                                  (p0) => Text(
-                                DatePatterns.eeeddmmm.format(p0.value),
-                                textAlign: TextAlign.center,
-                                style: GoogleFonts.comfortaa(
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.w600),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              c.filterDate),
+                        child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                          Flexible(
+                            child: ObxValue(
+                                    (p0) => Text(
+                                  DatePatterns.eeeddmmm.format(p0.value),
+                                  textAlign: TextAlign.center,
+                                  style: GoogleFonts.comfortaa(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.w600),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                c.filterDate),
+                          ),
                           const SizedBox(width: 4,),
                           const Icon(Icons.keyboard_arrow_down_rounded, size: 24,)
                         ],),
@@ -126,34 +132,32 @@ class Home extends StatelessWidget {
                     ],
                   ),
                 ),
-                Flexible(
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: const Color(0xff4993ff),
-                      borderRadius: BorderRadius.circular(24),
-                    ),
-                    child: InkWell(
-                      onTap: () async {
-                        await showCustomModalBottomSheet(
-                            context: context,
-                            builder: (_) => const AddEvent(),
-                            containerWidget: (BuildContext context,
-                                Animation<double> animation, Widget child) {
-                              return Scaffold(body: child);
-                            });
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.only(
-                            left: 20, top: 14, right: 20, bottom: 14),
-                        child: Text(
-                          'Add New',
-                          textAlign: TextAlign.center,
-                          style: GoogleFonts.comfortaa(
-                              color: Colors.white,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w700),
-                          overflow: TextOverflow.ellipsis,
-                        ),
+                DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: const Color(0xff4993ff),
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                  child: InkWell(
+                    onTap: () async {
+                      await showCustomModalBottomSheet(
+                          context: context,
+                          builder: (_) => const AddEvent(),
+                          containerWidget: (BuildContext context,
+                              Animation<double> animation, Widget child) {
+                            return Scaffold(body: child);
+                          });
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.only(
+                          left: 20, top: 14, right: 20, bottom: 14),
+                      child: Text(
+                        'Add New',
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.comfortaa(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ),
@@ -212,8 +216,7 @@ class Home extends StatelessWidget {
                                         var writeBatch =
                                             FirebaseFirestore.instance.batch();
                                         for (var element in batch) {
-                                          writeBatch.delete(
-                                              faEventColRef.doc(element.id));
+                                          writeBatch.delete(faEventColRef.doc(element.id));
                                         }
                                         commitBatchPromises
                                             .add(writeBatch.commit());

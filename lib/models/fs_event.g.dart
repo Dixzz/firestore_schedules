@@ -16,6 +16,7 @@ Event _$EventFromJson(Map<String, dynamic> json) => Event(
       json['prodMemRefId'] as String,
       json['virtual'] as bool,
       json['id'] as String? ?? "",
+      json['id'] as String? ?? "",
     );
 
 Map<String, dynamic> _$EventToJson(Event instance) => <String, dynamic>{
@@ -27,4 +28,5 @@ Map<String, dynamic> _$EventToJson(Event instance) => <String, dynamic>{
       'prodMemRefId': instance.prodMemRefId,
       'appName': instance.appName,
       'virtual': instance.virtual,
+      'bdRefId': instance.bdRefId,
     };
