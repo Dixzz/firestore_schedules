@@ -153,29 +153,45 @@ class _$PersonDao extends PersonDao {
   final DeletionAdapter<REvent> _rEventDeletionAdapter;
 
   @override
-  Stream<List<REvent>> findAllPersons() {
-    return _queryAdapter.queryListStream('SELECT * FROM REvent',
+  Stream<List<REvent>> findAllPersons(
+    DateTime start,
+    DateTime end,
+  ) {
+    return _queryAdapter.queryListStream(
+        'SELECT * FROM REvent WHERE event between ?1 and ?2 ORDER BY event ASC',
         mapper: (Map<String, Object?> row) => REvent(
             row['title'] as String,
             row['desc'] as String,
             _dateTimeConverter.decode(row['event'] as int),
             row['priority'] as int,
             (row['edit'] as int) != 0),
+        arguments: [
+          _dateTimeConverter.encode(start),
+          _dateTimeConverter.encode(end)
+        ],
         queryableName: 'REvent',
         isView: false);
   }
 
   @override
-  Stream<List<REvent>> findAllPersonsFiltered(int priority) {
+  Stream<List<REvent>> findAllPersonsFiltered(
+    int priority,
+    DateTime start,
+    DateTime end,
+  ) {
     return _queryAdapter.queryListStream(
-        'SELECT * FROM REvent WHERE priority = ?1',
+        'SELECT * FROM REvent WHERE priority = ?1 AND event between ?2 and ?3  ORDER BY event ASC',
         mapper: (Map<String, Object?> row) => REvent(
             row['title'] as String,
             row['desc'] as String,
             _dateTimeConverter.decode(row['event'] as int),
             row['priority'] as int,
             (row['edit'] as int) != 0),
-        arguments: [priority],
+        arguments: [
+          priority,
+          _dateTimeConverter.encode(start),
+          _dateTimeConverter.encode(end)
+        ],
         queryableName: 'REvent',
         isView: false);
   }

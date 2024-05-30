@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -10,8 +11,9 @@ import 'package:scheduler/helpers/dates.dart';
 import 'package:scheduler/helpers/logger.dart';
 import 'package:scheduler/models/revent.dart';
 import 'package:scheduler/provider/global_providers.dart';
+import 'package:timezone/timezone.dart' as tz;
 
-final dateStateProvider = StateProvider((ref) {
+final _dateStateProvider = StateProvider((ref) {
   return DateTime.now();
 });
 
@@ -24,8 +26,9 @@ final _editStateProvider = StateProvider((ref) {
 
 class AddREvent extends ConsumerStatefulWidget {
   final REvent? event;
+  final DateTime? date;
 
-  const AddREvent({this.event, Key? key}) : super(key: key);
+  const AddREvent({this.event, this.date, Key? key}) : super(key: key);
 
   @override
   AddREventState createState() => AddREventState();
@@ -33,6 +36,7 @@ class AddREvent extends ConsumerStatefulWidget {
 
 class AddREventState extends ConsumerState {
   REvent? get ogEvent => (widget as AddREvent).event;
+  DateTime? get date => (widget as AddREvent).date;
 
   late final titleCtr = TextEditingController();
   late final descCtr = TextEditingController();
@@ -52,7 +56,7 @@ class AddREventState extends ConsumerState {
               ),
             )));
     if (res is DateTime) {
-      ref.read(dateStateProvider.notifier).state = res;
+      ref.read(_dateStateProvider.notifier).state = res;
     }
   }
 
@@ -68,14 +72,20 @@ class AddREventState extends ConsumerState {
     // TODO: implement initState
     super.initState();
     final ogEventRef = ogEvent;
+    final dateRef = date;
+    if (dateRef != null) {
+      Future.delayed(Duration.zero, () => ref.read(_dateStateProvider.notifier).state = dateRef);
+    }
     if (ogEventRef != null) {
       titleCtr.text = ogEventRef.title;
       descCtr.text = ogEventRef.desc;
 
       Future.delayed(Duration.zero,
-          () => ref.read(dateStateProvider.notifier).state = ogEventRef.event);
-      Future.delayed(Duration.zero,
-          () => ref.read(_priorityStateProvider.notifier).state = ogEventRef.priority);
+          () => ref.read(_dateStateProvider.notifier).state = ogEventRef.event);
+      Future.delayed(
+          Duration.zero,
+          () => ref.read(_priorityStateProvider.notifier).state =
+              ogEventRef.priority);
     }
   }
 
@@ -183,7 +193,7 @@ class AddREventState extends ConsumerState {
                                   ),
                                   Text(
                                     DatePatterns.eeeddmmmyy
-                                        .format(ref.watch(dateStateProvider)),
+                                        .format(ref.watch(_dateStateProvider)),
                                     style: GoogleFonts.nunito(
                                       color: Colors.black,
                                       fontSize: 14,
@@ -239,7 +249,7 @@ class AddREventState extends ConsumerState {
                                   ),
                                   Text(
                                     TimePatterns.hhmmaa
-                                        .format(ref.watch(dateStateProvider)),
+                                        .format(ref.watch(_dateStateProvider)),
                                     style: GoogleFonts.nunito(
                                       color: Colors.black,
                                       fontSize: 14,
@@ -272,10 +282,6 @@ class AddREventState extends ConsumerState {
             const SizedBox(
               height: 8,
             ),
-            Builder(builder: (_) {
-              logit("Gawd ${ref.read(_priorityStateProvider)}");
-              return SizedBox.shrink();
-            }),
             Wrap(
               spacing: 4,
               children: [
@@ -378,7 +384,7 @@ class AddREventState extends ConsumerState {
             const SizedBox(
               height: 16,
             ),
-            ref.read(_editStateProvider)
+            ogEvent == null || ref.read(_editStateProvider)
                 ? Center(
                     child: FilledButton(
                       style: FilledButton.styleFrom(
@@ -398,15 +404,15 @@ class AddREventState extends ConsumerState {
             ogEvent == null
                 ? const SizedBox.shrink()
                 : Center(
-                  child: ref.read(_editStateProvider)
-                      ? const SizedBox.shrink()
-                      : TextButton(
-                          onPressed: () {
-                            ref.read(_editStateProvider.notifier).state =
-                                !ref.read(_editStateProvider);
-                          },
-                          child: const Text('Looking to update event?')),
-                ),
+                    child: ref.read(_editStateProvider)
+                        ? const SizedBox.shrink()
+                        : TextButton(
+                            onPressed: () {
+                              ref.read(_editStateProvider.notifier).state =
+                                  !ref.read(_editStateProvider);
+                            },
+                            child: const Text('Looking to update event?')),
+                  ),
           ],
         ),
       ),
@@ -422,7 +428,8 @@ class AddREventState extends ConsumerState {
   }
 
   Future<void> save(Function(String msg) param0, WidgetRef ref) async {
-    if (!ref.watch(_editStateProvider) && titleCtr.text.trim().isEmpty) {
+
+    if (!ref.read(_editStateProvider) && titleCtr.text.trim().isEmpty) {
       param0("Please enter title");
       return;
     }
@@ -430,19 +437,38 @@ class AddREventState extends ConsumerState {
       param0("Please enter description");
       return;
     }
+    if (!ref.read(_editStateProvider) && ref.read(_dateStateProvider.notifier).state.difference(DateTime.now()).inSeconds < 5) {
+      param0("Reminder schedule time too short");
+      return;
+    }
     final ogRef = ogEvent;
     if (!ref.watch(_editStateProvider) && ogRef == null) {
       await ref.read(dbProvider).personDao.insertItem(REvent(
           titleCtr.text,
           descCtr.text,
-          ref.read(dateStateProvider),
+          ref.read(_dateStateProvider),
           ref.read(_priorityStateProvider)));
+
     } else {
       await ref.read(dbProvider).personDao.updateItem(ogRef!.updateContent(
           descCtr.text,
-          ref.read(dateStateProvider),
+          ref.read(_dateStateProvider),
           ref.read(_priorityStateProvider)));
     }
+    
+    var scTime = tz.TZDateTime.from(ref.read(_dateStateProvider), tz.local);
+    logit("Notification scheduled for ${scTime.toLocal()} -- $scTime");
+    await ref.read(notifProvider).zonedSchedule(
+        titleCtr.text.hashCode,
+        titleCtr.text,
+        null,
+        scTime,
+        const NotificationDetails(
+            android:
+            AndroidNotificationDetails(notifChannel, notifChannelName)),
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation:
+        UILocalNotificationDateInterpretation.absoluteTime);
     titleCtr.clear();
     descCtr.clear();
     if (!mounted) return;

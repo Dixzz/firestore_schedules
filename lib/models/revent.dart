@@ -13,11 +13,11 @@ abstract class AppDatabase extends FloorDatabase {
 
 @dao
 abstract class PersonDao {
-  @Query('SELECT * FROM REvent')
-  Stream<List<REvent>> findAllPersons();
+  @Query('SELECT * FROM REvent WHERE event between :start and :end ORDER BY event ASC')
+  Stream<List<REvent>> findAllPersons(DateTime start, DateTime end);
 
-  @Query('SELECT * FROM REvent WHERE priority = :priority')
-  Stream<List<REvent>> findAllPersonsFiltered(int priority);
+  @Query('SELECT * FROM REvent WHERE priority = :priority AND event between :start and :end  ORDER BY event ASC')
+  Stream<List<REvent>> findAllPersonsFiltered(int priority, DateTime start, DateTime end);
 
   @insert
   Future<void> insertItem(REvent person);
