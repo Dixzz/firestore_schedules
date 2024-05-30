@@ -1,21 +1,14 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:scheduler/models/fs_event.dart';
-import 'package:scheduler/models/fs_product_member.dart';
 import 'package:scheduler/pages/home.dart';
-
-import 'models/revent.dart';
-import 'provider/global_providers.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
-late final CollectionReference<Event> faEventColRef;
-late final CollectionReference<ProductMember> faProdMemColRef;
-late final CollectionReference<ProductMember> faClientMemColRef;
+import 'models/revent.dart';
+import 'provider/global_providers.dart';
 
 Future<void> main() async {
   tz.initializeTimeZones();

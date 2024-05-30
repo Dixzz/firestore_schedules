@@ -39,21 +39,13 @@ dependencies:
   cupertino_icons: ^1.0.2
 
   flutter_riverpod: ^2.3.7
-  firebase_core: ^2.24.2
   intl: ^0.17.0
   easy_date_timeline:
     path: ./pub/easy_date_timeline
-  cloud_firestore: ^4.14.0
-  firebase_ui_firestore:
-    path: ./pub/firebase_ui_firestore-1.4.0
   implicitly_animated_reorderable_list:
     path: ./pub/implicitly_animated_reorderable_list
-  get: ^4.6.5
   flutter_svg: ^2.0.5
-  any_link_preview: ^3.0.0
-  url_launcher: ^6.1.11
   fluttertoast: ^8.2.5
-  flutter_switch: ^0.3.2
   modal_bottom_sheet:
     path: ./pub/modal_bottom_sheet-2.1.2
   duration_picker: ^1.2.0
@@ -62,7 +54,6 @@ dependencies:
   json_annotation: ^4.8.1
   flutter_local_notifications: ^17.1.2
   floor: ^1.4.2
-  sqflite: ^2.2.8+4
   flutter_native_splash: ^2.2.19
 
 dev_dependencies:
